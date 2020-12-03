@@ -54,6 +54,25 @@ def day2():
     return res1, res2
 
 
+def day3():
+    """Number of trees."""
+    x = open("3.txt").read().strip()
+    x = [[1 if i == "#" else 0 for i in row] for row in x.split("\n")]
+
+    cols = len(x[0])
+    res1 = sum(row[(3 * r) % cols] for r, row in enumerate(x))
+
+    res2 = 1
+    for cstride in [1, 3, 5, 7]:
+        res2 *= sum(row[(cstride * r) % cols] for r, row in enumerate(x))
+    for rstride in [2]:
+        res2 *= sum(
+            row[(r // rstride) % cols] for r, row in enumerate(x) if r % rstride == 0
+        )
+
+    return res1, res2
+
+
 if __name__ == "__main__":
     args = parser.parse_args()
     for day in [args.day] if isinstance(args.day, int) else args.day:
