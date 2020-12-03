@@ -6,6 +6,7 @@ Arguments:
   <day>  : [default: 1:int]
 """
 import re
+from textwrap import dedent
 
 import numpy as np
 from argopt import argopt
@@ -55,7 +56,7 @@ def day2():
 
 
 def day3():
-    """Number of trees."""
+    """Number of #s along a diagonal path."""
     x = open("3.txt").read().strip()
     x = [[1 if i == "#" else 0 for i in row] for row in x.split("\n")]
 
@@ -76,4 +77,5 @@ def day3():
 if __name__ == "__main__":
     args = parser.parse_args()
     for day in [args.day] if isinstance(args.day, int) else args.day:
-        print(globals()[f"day{day:d}"]())
+        func = globals()[f"day{day:d}"]
+        print(day, dedent(func.__doc__).strip(), func())
