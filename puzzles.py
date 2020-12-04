@@ -74,6 +74,34 @@ def day3():
     return res1, res2
 
 
+def day4():
+    """Number of valid passports."""
+    x = open("4.txt").read().strip()
+    x = [dict(i.split(":") for i in row.split()) for row in x.split("\n\n")]
+    REQUIRED = {"byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"}  # "cid"
+    x = list(filter(lambda i: not (REQUIRED - i.keys()), x))
+    res1 = len(x)
+
+    x = list(
+        filter(
+            lambda i: 1920 <= int(i["byr"]) <= 2002
+            and 2010 <= int(i["iyr"]) <= 2020
+            and 2020 <= int(i["eyr"]) <= 2030
+            and (
+                (i["hgt"][-2:] == "cm" and 150 <= int(i["hgt"][:-2]) <= 193)
+                or (i["hgt"][-2:] == "in" and 59 <= int(i["hgt"][:-2]) <= 76)
+            )
+            and re.match(r"^#[0-9a-f]{6}$", i["hcl"])
+            and re.match(r"^(amb|blu|brn|gry|grn|hzl|oth)$", i["ecl"])
+            and re.match(r"^\d{9}$", i["pid"]),
+            x,
+        )
+    )
+    res2 = len(x)
+
+    return res1, res2
+
+
 if __name__ == "__main__":
     args = parser.parse_args()
     for day in [args.day] if isinstance(args.day, int) else args.day:
