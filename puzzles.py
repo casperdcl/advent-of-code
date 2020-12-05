@@ -102,6 +102,20 @@ def day4():
     return res1, res2
 
 
+def day5():
+    """2D binary space partitioning plane seat IDs."""
+    x = open("5.txt").read().strip()
+    for i, j in ["F0", "B1", "L0", "R1"]:
+        x = x.replace(i, j)
+    x = [int(row[:7], 2) * 8 + int(row[7:], 2) for row in x.split("\n")]
+    res1 = max(x)
+
+    x = np.sort(x)
+    res2 = x[:-1][x[1:] - x[:-1] > 1][0] + 1  # missing ID
+
+    return res1, res2
+
+
 if __name__ == "__main__":
     args = parser.parse_args()
     for day in [args.day] if isinstance(args.day, int) else args.day:
