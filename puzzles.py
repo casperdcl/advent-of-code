@@ -116,6 +116,25 @@ def day5():
     return res1, res2
 
 
+def intersection(sets):
+    """Intersection of all given sets"""
+    res = None
+    for i in sets:
+        if res is None:
+            res = i
+        else:
+            res &= i
+    return res
+
+
+def day6():
+    """Common choices."""
+    x = open("6.txt").read().strip().split("\n\n")
+    res1 = sum(len({i for row in batch.split() for i in row}) for batch in x)
+    res2 = sum(len(intersection(set(row) for row in batch.split())) for batch in x)
+    return res1, res2
+
+
 if __name__ == "__main__":
     args = parser.parse_args()
     for day in [args.day] if isinstance(args.day, int) else args.day:
