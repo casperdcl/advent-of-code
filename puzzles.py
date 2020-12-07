@@ -6,8 +6,10 @@ Arguments:
   <day>  : [default: 1:int]
 """
 import re
+from functools import lru_cache
 from textwrap import dedent
 
+import networkx as nx
 import numpy as np
 from argopt import argopt
 
@@ -132,6 +134,35 @@ def day6():
     x = open("6.txt").read().strip().split("\n\n")
     res1 = sum(len({i for row in batch.split() for i in row}) for batch in x)
     res2 = sum(len(intersection(set(row) for row in batch.split())) for batch in x)
+    return res1, res2
+
+
+def day7():
+    """Counting matryoshka bags."""
+    x = open("7.txt").read().strip().split("\n")
+
+    g = nx.DiGraph()
+    for i in x:
+        i, outs = re.match("^(.*?) bags contain (.*).$", i).groups()
+        outs = filter(None, re.findall("(?:[0-9]+ (.*?)|no other) bags?", outs))
+        for j in outs:
+            g.add_edge(j, i)
+    res1 = len(nx.single_source_shortest_path(g, "shiny gold")) - 1
+
+    g = nx.DiGraph()
+    for i in x:
+        i, outs = re.match("^(.*?) bags contain (.*).$", i).groups()
+        outs = re.findall(r"\b([0-9]+|no) (.*?) bags?", outs)
+        for k, j in outs:
+            if (k, j) != ("no", "other"):
+                g.add_edge(i, j, weight=int(k))
+
+    @lru_cache(maxsize=len(g))
+    def get_sum(i):
+        return 1 + sum(get_sum(j) * k["weight"] for j, k in g[i].items())
+
+    res2 = sum(get_sum(j) * k["weight"] for j, k in g["shiny gold"].items())
+
     return res1, res2
 
 
