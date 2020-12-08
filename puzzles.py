@@ -8,6 +8,7 @@ Arguments:
 import re
 from functools import lru_cache
 from textwrap import dedent
+from time import time
 
 import networkx as nx
 import numpy as np
@@ -229,4 +230,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     for day in [args.day] if isinstance(args.day, int) else args.day:
         func = globals()[f"day{day:d}"]
-        print(day, dedent(func.__doc__).strip(), func())
+        doc = dedent(func.__doc__).replace("\n", "\n  ").strip()
+        t = time()
+        print(f"{day} {doc} {func()} {time() - t:.2f}s")
