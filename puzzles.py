@@ -166,6 +166,65 @@ def day7():
     return res1, res2
 
 
+def day8():
+    """Breaking infinite loops in Assembly."""
+    x = open("8.txt").read()
+    x = [
+        (i, int(v)) for i, v in re.findall(r"^(nop|acc|jmp) ([+-]\d+)$", x, flags=re.M)
+    ]
+
+    def run(x, visited=None):
+        visited = visited or set()
+        pc = 0  # program counter
+        acc = 0  # accumulator
+        while True:
+            if pc in visited:
+                break
+            visited.add(pc)
+            if x[pc][0] == "jmp":
+                pc += x[pc][1]
+            else:
+                if x[pc][0] == "acc":
+                    acc += x[pc][1]
+                pc += 1
+        return acc
+
+    res1 = run(x)
+
+    g = nx.DiGraph()
+    for pc, (i, v) in enumerate(x):
+        g.add_edge(pc, pc + (v if i == "jmp" else 1))
+
+    def loop_exists(g):
+        for cycle in nx.simple_cycles(g):
+            return cycle
+        return []
+
+    for pc in loop_exists(g):
+        i = x[pc][0]
+        pc2 = list(g[pc].keys())[0]
+        if i in ("jmp", "nop"):
+            g.remove_edge(pc, pc2)
+            if i == "jmp":
+                g.add_edge(pc, pc + 1)
+                if not loop_exists(g):
+                    break
+                g.remove_edge(pc, pc + 1)
+            else:  # i == "nop"
+                g.add_edge(pc, pc + x[pc][1])
+                if not loop_exists(g):
+                    break
+                g.remove_edge(pc, pc + x[pc][1])
+            g.add_edge(pc, pc2, i=i)
+    else:
+        raise ValueError("could not break loop")
+
+    x[pc] = ("jmp" if x[pc][0] == "nop" else "nop", x[pc][1])
+    res2 = run(x, {len(x)})
+
+    return res1, res2
+
+
 if __name__ == "__main__":
     args = parser.parse_args()
     for day in [args.day] if isinstance(args.day, int) else args.day:
