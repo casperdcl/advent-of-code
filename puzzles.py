@@ -226,6 +226,35 @@ def day8():
     return res1, res2
 
 
+def day9():
+    """eXchange-Masking Addition System (XMAS)."""
+    x = np.loadtxt("9.txt", dtype=np.int64)
+    mask = 25
+
+    for i in range(mask, len(x)):
+        prev = x[i - mask : i]
+        other = set(x[i] - prev) & set(prev)
+        if not other or (len(other) == 1 and prev.count(x[i] / 2) > 1):
+            res1 = x[i]
+            break
+    else:
+        raise IndexError("no solution found")
+
+    for i in range(len(x)):
+        j = i + 2
+        s = x[i:j].sum()
+        while s < res1:
+            s += x[j]
+            j += 1
+        if s == res1:
+            res2 = x[i:j].min() + x[i:j].max()
+            break
+    else:
+        raise IndexError("not found")
+
+    return res1, res2
+
+
 if __name__ == "__main__":
     args = parser.parse_args()
     for day in [args.day] if isinstance(args.day, int) else args.day:
