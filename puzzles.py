@@ -255,6 +255,23 @@ def day9():
     return res1, res2
 
 
+def day10():
+    """Chain of adapters."""
+    x = np.loadtxt("10.txt", dtype=np.int16)
+    x = np.concatenate([[0], x, [x.max() + 3]])
+    x.sort()
+    diff = (x[1:] - x[:-1]).tolist()
+    res1 = diff.count(3) * diff.count(1)
+
+    assert set(diff) == {1, 3}, "all diffs must be 1 or 3"
+    seg = re.split("3+", "".join(map(str, diff)))
+    assert max(seg) == "1111", "have not hard-coded more paths"
+    num_routes = {"": 1, "1": 1, "11": 2, "111": 4, "1111": 7}
+    res2 = np.product([num_routes[i] for i in seg])
+
+    return res1, res2
+
+
 if __name__ == "__main__":
     args = parser.parse_args()
     for day in [args.day] if isinstance(args.day, int) else args.day:
