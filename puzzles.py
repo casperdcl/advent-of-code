@@ -272,6 +272,83 @@ def day10():
     return res1, res2
 
 
+def col(x, c):
+    """extract column c from nested lists in x"""
+    return [row[c] for row in x]
+
+
+def repeat_until_stable(epoch, x):
+    new = epoch(x)
+    while not all(i == j for i, j in zip(new, x)):
+        x = new
+        new = epoch(x)
+    return new
+
+
+def day11():
+    """Game of Seats."""
+    x = open("11.txt").read().strip().split("\n")
+    h, w = len(x), len(x[0])
+
+    def adj(x, j, i):
+        return "".join(
+            x[J][I]
+            for J in range(max(j - 1, 0), min(j + 2, h))
+            for I in range(max(i - 1, 0), min(i + 2, w))
+            if I != i or J != j
+        )
+
+    def epoch(old):
+        new = list(map(list, old))
+        for j in range(h):
+            for i in range(w):
+                if old[j][i] == "L":
+                    if "#" not in adj(old, j, i):
+                        new[j][i] = "#"
+                elif old[j][i] == "#":
+                    if adj(old, j, i).count("#") >= 4:
+                        new[j][i] = "L"
+        return new
+
+    res1 = sum(i.count("#") for i in repeat_until_stable(epoch, x))
+
+    def see(x, j, i):
+        res = 0
+        for line in (
+            col(x[j + 1 :], i),  # S
+            col(x[:j][::-1], i),  # N
+            x[j][i + 1 :],  # E
+            x[j][:i][::-1],  # W
+            [x[J][I] for J, I in zip(range(j + 1, w), range(i + 1, h))],  # SE
+            [x[J][I] for J, I in zip(range(j + 1, w), range(i - 1, -1, -1))],  # SW
+            [x[J][I] for J, I in zip(range(j - 1, -1, -1), range(i + 1, h))],  # NE
+            [x[J][I] for J, I in zip(range(j - 1, -1, -1), range(i - 1, -1, -1))],  # NW
+        ):
+            for i in line:
+                if i == "#":
+                    res += 1
+                    break
+                elif i == "L":
+                    break
+        return res
+
+    def epoch2(old):
+        new = list(map(list, old))
+        for j in range(h):
+            for i in range(w):
+                if old[j][i] == "L":
+                    if not see(old, j, i):
+                        new[j][i] = "#"
+                elif old[j][i] == "#":
+                    if see(old, j, i) >= 5:
+                        new[j][i] = "L"
+        return new
+
+    res2 = sum(i.count("#") for i in repeat_until_stable(epoch2, x))
+
+    return res1, res2
+
+
 def main(argv=None):
     args = parser.parse_args(argv)
     for day in [args.day] if isinstance(args.day, int) else args.day:
