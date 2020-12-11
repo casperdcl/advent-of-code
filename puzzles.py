@@ -272,10 +272,14 @@ def day10():
     return res1, res2
 
 
-if __name__ == "__main__":
-    args = parser.parse_args()
+def main(argv=None):
+    args = parser.parse_args(argv)
     for day in [args.day] if isinstance(args.day, int) else args.day:
         func = globals()[f"day{day:d}"]
         doc = dedent(func.__doc__).replace("\n", "\n  ").strip()
         t = time()
         print(f"{day} {doc} {func()} {time() - t:.2f}s")
+
+
+if __name__ == "__main__":
+    main()
