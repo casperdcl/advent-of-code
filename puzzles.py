@@ -274,14 +274,14 @@ def day10():
 
 def col(x, c):
     """extract column c from nested lists in x"""
-    return [row[c] for row in x]
+    return (row[c] for row in x)
 
 
-def repeat_until_stable(epoch, x):
-    new = epoch(x)
+def repeat_until_stable(func, x):
+    new = func(x)
     while not all(i == j for i, j in zip(new, x)):
         x = new
-        new = epoch(x)
+        new = func(x)
     return new
 
 
@@ -291,7 +291,7 @@ def day11():
     h, w = len(x), len(x[0])
 
     def adj(x, j, i):
-        return "".join(
+        return (
             x[J][I]
             for J in range(max(j - 1, 0), min(j + 2, h))
             for I in range(max(i - 1, 0), min(i + 2, w))
@@ -306,7 +306,7 @@ def day11():
                     if "#" not in adj(old, j, i):
                         new[j][i] = "#"
                 elif old[j][i] == "#":
-                    if adj(old, j, i).count("#") >= 4:
+                    if "".join(adj(old, j, i)).count("#") >= 4:
                         new[j][i] = "L"
         return new
 
@@ -319,10 +319,10 @@ def day11():
             col(x[:j][::-1], i),  # N
             x[j][i + 1 :],  # E
             x[j][:i][::-1],  # W
-            [x[J][I] for J, I in zip(range(j + 1, w), range(i + 1, h))],  # SE
-            [x[J][I] for J, I in zip(range(j + 1, w), range(i - 1, -1, -1))],  # SW
-            [x[J][I] for J, I in zip(range(j - 1, -1, -1), range(i + 1, h))],  # NE
-            [x[J][I] for J, I in zip(range(j - 1, -1, -1), range(i - 1, -1, -1))],  # NW
+            (x[J][I] for J, I in zip(range(j + 1, w), range(i + 1, h))),  # SE
+            (x[J][I] for J, I in zip(range(j + 1, w), range(i - 1, -1, -1))),  # SW
+            (x[J][I] for J, I in zip(range(j - 1, -1, -1), range(i + 1, h))),  # NE
+            (x[J][I] for J, I in zip(range(j - 1, -1, -1), range(i - 1, -1, -1))),  # NW
         ):
             for i in line:
                 if i == "#":
