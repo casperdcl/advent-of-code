@@ -349,6 +349,60 @@ def day11():
     return res1, res2
 
 
+def day12():
+    """Waypoint ship navigation."""
+    d = open("12.txt").read().strip().split("\n")
+    d = [(i[0], int(i[1:])) for i in d]
+
+    x, y = 0, 0  # x/y points E/N
+    o = 0  # orientation clockwise from x-axis (E)
+
+    for k, v in d:
+        if k == "F":
+            k = {0: "E", 90: "N", 180: "W", 270: "S"}[o]
+
+        if k in "NS":
+            y += v * (1 if k == "N" else -1)
+        elif k in "EW":
+            x += v * (1 if k == "E" else -1)
+        elif k in "LR":
+            o += v * (1 if k == "L" else -1)
+            o %= 360
+        else:
+            raise KeyError(k)
+
+    res1 = abs(x) + abs(y)
+
+    wx, wy = 10, 1  # waypoint
+    x, y = 0, 0  # ship
+    for k, v in d:
+        if k == "F":
+            x += v * wx
+            y += v * wy
+        elif k in "NS":
+            wy += v * (1 if k == "N" else -1)
+        elif k in "EW":
+            wx += v * (1 if k == "E" else -1)
+        elif k in "LR":
+            v = v * (1 if k == "L" else -1)
+            while v < 0:
+                v += 360
+            if v == 90:
+                wx, wy = -wy, wx
+            elif v == 180:
+                wx, wy = -wx, -wy
+            elif v == 270:
+                wx, wy = wy, -wx
+            else:
+                raise ValueError(v)
+        else:
+            raise KeyError(k)
+
+    res2 = abs(x) + abs(y)
+
+    return res1, res2
+
+
 def main(argv=None):
     args = parser.parse_args(argv)
     for day in [args.day] if isinstance(args.day, int) else args.day:
