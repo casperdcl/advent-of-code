@@ -5,14 +5,17 @@
 Arguments:
   <day>  : [default: 1:int]
 """
-from argopt import argopt
+import re
+
 import numpy as np
+from argopt import argopt
 
 parser = argopt(__doc__)
 
 
 def day1():
-    """Pairs and triplets of numbers which sum to 2020.
+    """
+    Pairs/triplets of numbers which sum to 2020.
     Returns product of answers.
     """
     x = np.loadtxt("1.txt", dtype=np.int16)
@@ -30,6 +33,23 @@ def day1():
             assert res2[-1] in x
             res2 = np.product(res2)
             break
+
+    return res1, res2
+
+
+def day2():
+    """Number of valid passwords."""
+    x = open("2.txt").read()
+    x = re.findall(r"^(\d+)-(\d+) (\w): (.+)$", x, flags=re.M)
+
+    res1 = sum(
+        1 if int(cmin) <= pwd.count(c) <= int(cmax) else 0 for cmin, cmax, c, pwd in x
+    )
+
+    res2 = sum(
+        1 if (pwd[int(i) - 1] + pwd[int(j) - 1]).count(c) == 1 else 0
+        for i, j, c, pwd in x
+    )
 
     return res1, res2
 
