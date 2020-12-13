@@ -6,7 +6,7 @@ Arguments:
   <day>  : [default: 1:int]
 """
 import re
-from functools import lru_cache
+from functools import lru_cache, reduce
 from textwrap import dedent
 from time import time
 
@@ -399,6 +399,60 @@ def day12():
             raise KeyError(k)
 
     res2 = abs(x) + abs(y)
+
+    return res1, res2
+
+
+def euclid_ext(a, b):
+    """
+    linear combination such that `gcd(a, b) == a * x + b * y`
+    Returns: dict{gcd, x, y}
+    """
+    aO, bO = a, b
+
+    x = lasty = 0
+    y = lastx = 1
+    while b != 0:
+        q = a // b
+        a, b = b, a % b
+        x, lastx = lastx - q * x, x
+        y, lasty = lasty - q * y, y
+
+    return {"x": lastx, "y": lasty, "gcd": aO * lastx + bO * lasty}
+
+
+def linear_congruence(rem_mods):
+    """
+    >>> linear_congruence([(4, 19), (12, 37), (14, 43)])
+    (22804, 30229)
+    """
+    M = reduce(lambda x, y: x * y, (i for _, i in rem_mods))
+    x = 0
+    for remi, modi in rem_mods:
+        Mi = M // modi
+        x += remi * euclid_ext(Mi, modi)["x"] * Mi
+    return ((x % M) + M) % M, M
+
+
+def day13():
+    """Bus timetables."""
+    x = open("13.txt").read().strip().split("\n")
+    start = int(x[0])
+    nums = {int(i) for i in x[1].split(",") if i != "x"}
+
+    for i in range(start, start + min(nums)):
+        deps = {i % n: n for n in nums}
+        if 0 in deps:
+            res1 = deps[0] * (i - start)
+            break
+
+    res2 = linear_congruence(
+        [
+            ((int(n) - t) % int(n), int(n))
+            for t, n in enumerate(x[1].split(","))
+            if n != "x"
+        ]
+    )
 
     return res1, res2
 
