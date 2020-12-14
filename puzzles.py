@@ -197,9 +197,7 @@ def day8():
         g.add_edge(pc, pc + (v if i == "jmp" else 1))
 
     def loop_exists(g):
-        for cycle in nx.simple_cycles(g):
-            return cycle
-        return []
+        return next(nx.simple_cycles(g), [])
 
     for pc in loop_exists(g):
         i = x[pc][0]
