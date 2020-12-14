@@ -354,7 +354,7 @@ def day12():
     d = open("12.txt").read().strip().split("\n")
     d = [(i[0], int(i[1:])) for i in d]
 
-    x, y = 0, 0  # x/y points E/N
+    xy = 0  # real/imag points E/N
     o = 0  # orientation clockwise from x-axis (E)
 
     for k, v in d:
@@ -362,43 +362,31 @@ def day12():
             k = {0: "E", 90: "N", 180: "W", 270: "S"}[o]
 
         if k in "NS":
-            y += v * (1 if k == "N" else -1)
+            xy += v * (1j if k == "N" else -1j)
         elif k in "EW":
-            x += v * (1 if k == "E" else -1)
+            xy += v * (1 if k == "E" else -1)
         elif k in "LR":
             o += v * (1 if k == "L" else -1)
             o %= 360
         else:
             raise KeyError(k)
 
-    res1 = abs(x) + abs(y)
+    res1 = int(sum(map(abs, (xy.real, xy.imag))))
 
-    wx, wy = 10, 1  # waypoint
-    x, y = 0, 0  # ship
+    wxy = 10 + 1j  # waypoint
+    xy = 0  # ship
     for k, v in d:
         if k == "F":
-            x += v * wx
-            y += v * wy
-        elif k in "NS":
-            wy += v * (1 if k == "N" else -1)
-        elif k in "EW":
-            wx += v * (1 if k == "E" else -1)
+            xy += v * wxy
+        elif k in "NSEW":
+            wxy += v * {"N": 1j, "S": -1j, "E": 1, "W": -1}[k]
         elif k in "LR":
             v = v * (1 if k == "L" else -1)
-            while v < 0:
-                v += 360
-            if v == 90:
-                wx, wy = -wy, wx
-            elif v == 180:
-                wx, wy = -wx, -wy
-            elif v == 270:
-                wx, wy = wy, -wx
-            else:
-                raise ValueError(v)
+            wxy *= 1j ** (v / 90)
         else:
             raise KeyError(k)
 
-    res2 = abs(x) + abs(y)
+    res2 = int(sum(map(abs, (xy.real, xy.imag))))
 
     return res1, res2
 
@@ -438,20 +426,17 @@ def day13():
     """Bus timetables."""
     x = open("13.txt").read().strip().split("\n")
     start = int(x[0])
-    nums = {int(i) for i in x[1].split(",") if i != "x"}
+    nums = {int(n) for n in x[1].split(",") if n != "x"}
 
-    for i in range(start, start + min(nums)):
-        deps = {i % n: n for n in nums}
-        if 0 in deps:
-            res1 = deps[0] * (i - start)
-            break
+    res1 = next(
+        deps[0] * (i - start)
+        for i in range(start, start + min(nums))
+        for deps in [{i % n: n for n in nums}]
+        if 0 in deps
+    )
 
     res2 = linear_congruence(
-        [
-            ((int(n) - t) % int(n), int(n))
-            for t, n in enumerate(x[1].split(","))
-            if n != "x"
-        ]
+        [(int(n) - t, int(n)) for t, n in enumerate(x[1].split(",")) if n != "x"]
     )
 
     return res1, res2
