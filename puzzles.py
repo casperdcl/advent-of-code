@@ -6,7 +6,9 @@ Arguments:
   <day>  : [default: 1:int]
 """
 import re
+from collections import defaultdict
 from functools import lru_cache, reduce
+from itertools import combinations
 from textwrap import dedent
 from time import time
 
@@ -436,6 +438,42 @@ def day13():
     res2 = linear_congruence(
         [(int(n) - t, int(n)) for t, n in enumerate(x[1].split(",")) if n != "x"]
     )
+
+    return res1, res2
+
+
+def day14():
+    """Bit masks."""
+    x = open("14.txt").read().strip().split("\n")
+
+    mem = defaultdict(int)
+    msk = [(1 << 36) - 1, 0]  # zeros, ones
+    for i in x:
+        if i.startswith("mask"):
+            msk[0] = int(i[7:].replace("X", "1"), 2)
+            msk[1] = int(i[7:].replace("X", "0"), 2)
+        else:
+            addr, val = map(int, re.match(r"^mem\[(\d+)\] = (\d+)$", i).groups())
+            mem[addr] = (val & msk[0]) | msk[1]
+    res1 = sum(mem.values())
+
+    mem = defaultdict(int)
+    msk = [(1 << 36) - 1, 0, []]  # zeros, ones, floats
+    for i in x:
+        if i.startswith("mask"):
+            msk[0] = int(i[7:].replace("0", "1").replace("X", "0"), 2)
+            msk[1] = int(i[7:].replace("X", "0"), 2)
+            msk[2] = [bit for bit, v in enumerate(i[7:][::-1]) if v == "X"]
+        else:
+            addr, val = map(int, re.match(r"^mem\[(\d+)\] = (\d+)$", i).groups())
+            addr = (addr & msk[0]) | msk[1]
+            for nbits in range(len(msk[2]) + 1):
+                for bits in combinations(msk[2], nbits):
+                    a = addr
+                    for i in bits:
+                        a |= 1 << i
+                    mem[a] = val
+    res2 = sum(mem.values())
 
     return res1, res2
 
