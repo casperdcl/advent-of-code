@@ -6,8 +6,8 @@ Arguments:
   <day>  : [default: 1:int]
 """
 import re
-from collections import defaultdict
-from functools import lru_cache, reduce
+from collections import defaultdict, deque
+from functools import lru_cache, partial, reduce
 from itertools import combinations
 from textwrap import dedent
 from time import time
@@ -15,6 +15,7 @@ from time import time
 import networkx as nx
 import numpy as np
 from argopt import argopt
+from tqdm import trange
 
 parser = argopt(__doc__)
 
@@ -474,6 +475,26 @@ def day14():
                         a |= 1 << i
                     mem[a] = val
     res2 = sum(mem.values())
+
+    return res1, res2
+
+
+def day15():
+    """Memory Sequences."""
+    x = list(map(int, open("15.txt").read().strip().split(",")))
+
+    # defaultdict(list) takes more memory but is slightly quicker
+    d = defaultdict(partial(deque, maxlen=2))
+    for i, v in enumerate(x):
+        d[v].append(i)
+
+    last = x[-1]
+    for i in trange(len(x), 30000000, unit_scale=True):
+        last = d[last][-1] - d[last][-2] if len(d[last]) > 1 else 0
+        d[last].append(i)
+        if i == 2019:
+            res1 = last
+    res2 = last
 
     return res1, res2
 
