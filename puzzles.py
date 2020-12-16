@@ -14,6 +14,7 @@ from time import time
 
 import networkx as nx
 import numpy as np
+import yaml
 from argopt import argopt
 from tqdm import trange
 
@@ -438,7 +439,7 @@ def day13():
 
     res2 = linear_congruence(
         [(int(n) - t, int(n)) for t, n in enumerate(x[1].split(",")) if n != "x"]
-    )
+    )[0]
 
     return res1, res2
 
@@ -496,6 +497,52 @@ def day15():
             res1 = last
     res2 = last
 
+    return res1, res2
+
+
+def day16():
+    """Inferring keys from valid value rules."""
+    re_sub = partial(re.compile(r"^(\d)", flags=re.M).sub, r"  \1")
+    d = yaml.safe_load(
+        re_sub(
+            open("16.txt").read().strip().replace("\n\n", "\n").replace(":\n", ": |\n")
+        )
+    )
+    your = list(map(int, d.pop("your ticket").strip().split(",")))
+    near = [
+        list(map(int, i.split(",")))
+        for i in d.pop("nearby tickets").strip().split("\n")
+    ]
+
+    valid = {}
+    for k, i in d.items():
+        valid[k] = set()
+        for rule in i.split(" or "):
+            a, b = map(int, rule.split("-"))
+            valid[k] |= set(range(a, b + 1))
+
+    all_valid = set()
+    for i in valid.values():
+        all_valid |= i
+    res1 = sum(i for t in near for i in t if i not in all_valid)
+
+    near = np.asanyarray([t for t in near if len(set(t) - all_valid) == 0])
+
+    idxs_possible = defaultdict(list)
+    for k, v in valid.items():
+        for i in range(near.shape[1]):
+            if len(set(near[:, i]) - v) == 0:
+                idxs_possible[i].append(k)
+    idxs_possible = sorted(idxs_possible.items(), key=lambda x: len(x[1]))
+
+    idxs = {}
+    seen = set()
+    for i, vs in idxs_possible:
+        v = (set(vs) - seen).pop()
+        seen.add(v)
+        idxs[v] = i
+
+    res2 = np.product([your[v] for k, v in idxs.items() if k.startswith("departure")])
     return res1, res2
 
 
