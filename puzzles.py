@@ -16,6 +16,7 @@ import networkx as nx
 import numpy as np
 import yaml
 from argopt import argopt
+from scipy.ndimage import convolve
 from tqdm import trange
 
 parser = argopt(__doc__)
@@ -543,6 +544,41 @@ def day16():
         idxs[v] = i
 
     res2 = np.product([your[v] for k, v in idxs.items() if k.startswith("departure")])
+    return res1, res2
+
+
+def day17():
+    """Game of Life 4D."""
+    x = np.asanyarray(
+        [
+            [
+                [1 if i == "#" else 0 for i in j]
+                for j in open("17.txt").read().strip().split("\n")
+            ]
+        ],
+        dtype=np.int8,
+    )
+    x = np.pad(x, ((6, 6), (6, 6), (6, 6)))
+    knl = np.ones((3, 3, 3), dtype=x.dtype)
+    knl[1, 1, 1] = 0
+
+    def epoch(old):
+        adj = convolve(old, knl, mode="constant")
+        new = (((adj == 2) | (adj == 3)) & (old == 1)) | ((old == 0) & (adj == 3))
+        return new.astype(old.dtype)
+
+    res1 = x
+    for _ in range(6):
+        res1 = epoch(res1)
+    res1 = res1.sum()
+
+    res2 = np.pad([x], ((6, 6),) + ((0, 0),) * 3)
+    knl = np.pad([knl], ((6, 6),) + ((0, 0),) * 3)
+    knl[::2] = 1
+    for _ in range(6):
+        res2 = epoch(res2)
+    res2 = res2.sum()
+
     return res1, res2
 
 
