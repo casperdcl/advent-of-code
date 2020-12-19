@@ -3,7 +3,7 @@
 Solutions to problems from <https://adventofcode.com/2020>.
 
 ```sh
-python3 puzzles.py --help
+python3 aoc.py --help
 ```
 
 - readability: style nearly production-worthy (i.e. maintainability is more important than amusing code golf)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Usage:
-  puzzle [<day>...]
+  aoc [<day>...]
 
 Arguments:
   <day>  : [default: 1:int]
