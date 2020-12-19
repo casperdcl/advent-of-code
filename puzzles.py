@@ -16,7 +16,6 @@ import networkx as nx
 import numpy as np
 import yaml
 from argopt import argopt
-from cllist import dllist
 from scipy.ndimage import convolve
 from tqdm import trange
 
@@ -581,40 +580,25 @@ def day17():
     return res1, res2
 
 
+class IntDay18(int):
+    def __add__(self, i):
+        return IntDay18(int.__add__(self, i))
+
+    def __sub__(self, i):
+        """`int.__mul__` with same precendence as `__add__`"""
+        return IntDay18(int.__mul__(self, i))
+
+    def __mul__(self, i):
+        """`__add__` with same precendence as `__mul__`"""
+        return self + i
+
+
 def day18():
     """Changing mathematical operator precedence."""
-    x = open("18.txt").read().strip().split("\n")
-
-    def left2right(expr):
-        expr = re.split(r"\s*([+*])\s*", expr)
-        i = expr[0]
-        for j in range(1, len(expr), 2):
-            i = str(eval(i + expr[j] + expr[j + 1]))
-        return i
-
-    def parens_eval(i, flat_eval):
-        while "(" in i:
-            for sub in re.findall(r"\([^()]+\)", i):
-                i = i.replace(sub, flat_eval(sub[1:-1]))
-        return int(flat_eval(i))
-
-    res1 = sum(map(partial(parens_eval, flat_eval=left2right), x))
-
-    def add_before_prod(expr):
-        expr = dllist(re.split(r"\s*([+*])\s*", expr))
-        j = expr.first.next
-        while j is not None:
-            if j() == "+":
-                j.value = str(eval(j.prev() + j() + j.next()))  # noqa: B305
-                expr.remove(j.prev)
-                expr.remove(j.next)
-                j = j.next
-            else:
-                j = j.next.next
-        return str(eval("".join(i for i in expr)))
-
-    res2 = sum(map(partial(parens_eval, flat_eval=add_before_prod), x))
-
+    x = open("18.txt").read().strip()
+    x = re.sub("([0-9]+)", r"IntDay18(\1)", x, flags=re.M).split("\n")
+    res1 = sum(eval(i.replace("*", "-")) for i in x)
+    res2 = sum(eval(i.replace("*", "-").replace("+", "*")) for i in x)
     return res1, res2
 
 

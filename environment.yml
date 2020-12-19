@@ -5,7 +5,6 @@ channels:
 dependencies:
 - python=3
 - ipykernel
-- pip
 - argopt
 - networkx
 - numpy
@@ -13,5 +12,3 @@ dependencies:
 - pyyaml
 - scipy
 - tqdm
-- pip:
-  - cllist
