@@ -16,6 +16,7 @@ import networkx as nx
 import numpy as np
 import yaml
 from argopt import argopt
+from cllist import dllist
 from scipy.ndimage import convolve
 from tqdm import trange
 
@@ -602,16 +603,17 @@ def day18():
     res1 = sum(map(partial(parens_eval, flat_eval=left2right), x))
 
     def add_before_prod(expr):
-        expr = re.split(r"\s*([+*])\s*", expr)
-        j = 1
-        while j < len(expr):
-            if expr[j] == "+":
-                i = str(eval("".join(expr[j - 1 : j + 2])))
-                # linked list would be more efficient
-                expr = expr[: j - 1] + [i] + expr[j + 2 :]
+        expr = dllist(re.split(r"\s*([+*])\s*", expr))
+        j = expr.first.next
+        while j is not None:
+            if j() == "+":
+                j.value = str(eval(j.prev() + j() + j.next()))  # noqa: B305
+                expr.remove(j.prev)
+                expr.remove(j.next)
+                j = j.next
             else:
-                j += 2
-        return str(eval("".join(expr)))
+                j = j.next.next
+        return str(eval("".join(i for i in expr)))
 
     res2 = sum(map(partial(parens_eval, flat_eval=add_before_prod), x))
 

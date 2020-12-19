@@ -1,0 +1,16 @@
+name: aoc
+channels:
+- conda-forge
+- defaults
+dependencies:
+- python=3
+- ipykernel
+- pip
+- argopt
+- networkx
+- numpy
+- pyyaml
+- scipy
+- tqdm
+- pip:
+  - cllist
