@@ -9,6 +9,7 @@ dependencies:
 - argopt
 - networkx
 - numpy
+- pre-commit
 - pyyaml
 - scipy
 - tqdm
