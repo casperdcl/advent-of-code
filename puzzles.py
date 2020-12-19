@@ -20,8 +20,6 @@ from cllist import dllist
 from scipy.ndimage import convolve
 from tqdm import trange
 
-parser = argopt(__doc__)
-
 
 def day1():
     """
@@ -618,6 +616,65 @@ def day18():
     res2 = sum(map(partial(parens_eval, flat_eval=add_before_prod), x))
 
     return res1, res2
+
+
+def day19():
+    """Matching rules."""
+    rules, d = open("19.txt").read().strip().split("\n\n")
+    invalid_char = "x"
+    assert invalid_char not in d
+    rules = yaml.safe_load(rules)
+    d = d.split("\n")
+
+    def str2int(i):
+        return int(i) if re.match("^[0-9]+$", i) else i
+
+    # tuple -> sequence, list -> OR
+    rules = {
+        k: (
+            [tuple(map(str2int, i.split(" "))) for i in v.split(" | ")]
+            if hasattr(v, "split")
+            else ((v,),)
+        )
+        for k, v in rules.items()
+    }
+
+    maxdepth = max(map(len, d))
+
+    def rec(node, depth=0):
+        if depth > maxdepth:
+            return invalid_char
+        if isinstance(node, str):
+            return node
+        if isinstance(node, int):
+            return rules[node]
+        res = type(node)(map(partial(rec, depth=depth + 1), node))
+        return res[0] if len(res) == 1 else res
+
+    def flatten(node):
+        if isinstance(node, str):
+            return node
+        if all(isinstance(i, str) for i in node):
+            # tuple -> sequence, list -> OR
+            return "(" + ("|" if isinstance(node, list) else "").join(node) + ")"
+        return type(node)(map(flatten, node))
+
+    def filter_rules(d):
+        reg = re.compile(
+            "^" + repeat_until_stable(flatten, repeat_until_stable(rec, rules[0])) + "$"
+        )
+        return filter(reg.match, d)
+
+    res1 = len(list(filter_rules(d)))
+
+    rules[8] = [(42,), (42, 8)]
+    rules[11] = [(42, 31), (42, 11, 31)]
+    res2 = len(list(filter_rules(d)))
+
+    return res1, res2
+
+
+parser = argopt(__doc__)
 
 
 def main(argv=None):
