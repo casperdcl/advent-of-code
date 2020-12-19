@@ -582,6 +582,42 @@ def day17():
     return res1, res2
 
 
+def day18():
+    """Changing mathematical operator precedence."""
+    x = open("18.txt").read().strip().split("\n")
+
+    def left2right(expr):
+        expr = re.split(r"\s*([+*])\s*", expr)
+        i = expr[0]
+        for j in range(1, len(expr), 2):
+            i = str(eval(i + expr[j] + expr[j + 1]))
+        return i
+
+    def parens_eval(i, flat_eval):
+        while "(" in i:
+            for sub in re.findall(r"\([^()]+\)", i):
+                i = i.replace(sub, flat_eval(sub[1:-1]))
+        return int(flat_eval(i))
+
+    res1 = sum(map(partial(parens_eval, flat_eval=left2right), x))
+
+    def add_before_prod(expr):
+        expr = re.split(r"\s*([+*])\s*", expr)
+        j = 1
+        while j < len(expr):
+            if expr[j] == "+":
+                i = str(eval("".join(expr[j - 1 : j + 2])))
+                # linked list would be more efficient
+                expr = expr[: j - 1] + [i] + expr[j + 2 :]
+            else:
+                j += 2
+        return str(eval("".join(expr)))
+
+    res2 = sum(map(partial(parens_eval, flat_eval=add_before_prod), x))
+
+    return res1, res2
+
+
 def main(argv=None):
     args = parser.parse_args(argv)
     for day in [args.day] if isinstance(args.day, int) else args.day:
