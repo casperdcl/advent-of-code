@@ -8,7 +8,7 @@ Arguments:
 import re
 from collections import defaultdict, deque
 from functools import lru_cache, partial, reduce
-from itertools import combinations
+from itertools import combinations, islice, product
 from textwrap import dedent
 from time import time
 
@@ -29,7 +29,7 @@ def day1():
     set_x = set(x)
 
     y = set(2020 - x)
-    res1 = np.product(list(set_x & y))
+    res1 = np.prod(list(set_x & y))
 
     for target in y:
         z = set(target - x)
@@ -38,7 +38,7 @@ def day1():
             res2 = list(res2)
             res2.append(2020 - sum(res2))
             assert res2[-1] in x
-            res2 = np.product(res2)
+            res2 = np.prod(res2)
             break
 
     return res1, res2
@@ -268,7 +268,7 @@ def day10():
     seg = re.split("3+", "".join(map(str, diff)))
     assert max(seg) == "1111", "have not hard-coded more paths"
     num_routes = {"": 1, "1": 1, "11": 2, "111": 4, "1111": 7}
-    res2 = np.product([num_routes[i] for i in seg])
+    res2 = np.prod([num_routes[i] for i in seg])
 
     return res1, res2
 
@@ -541,7 +541,7 @@ def day16():
         seen.add(v)
         idxs[v] = i
 
-    res2 = np.product([your[v] for k, v in idxs.items() if k.startswith("departure")])
+    res2 = np.prod([your[v] for k, v in idxs.items() if k.startswith("departure")])
     return res1, res2
 
 
@@ -654,6 +654,85 @@ def day19():
     rules[8] = [(42,), (42, 8)]
     rules[11] = [(42, 31), (42, 11, 31)]
     res2 = len(list(filter_rules(d)))
+
+    return res1, res2
+
+
+def day20():
+    """Reconstructing image from pieces & object detection."""
+    x = open("20.txt").read().strip().split("\n\n")
+    obj, x = x[0].split(":\n")[1], x[1:]
+    obj = np.array(
+        [[1 if i == "#" else 0 for i in row] for row in obj.split("\n")], dtype=np.uint8
+    )
+    x = {
+        int(num[5:]): np.array(
+            [[1 if i == "#" else 0 for i in row] for row in dat.split()], dtype=np.uint8
+        )
+        for tile in x
+        for num, dat in [tile.split(":\n")]
+    }
+
+    def orientations(tile):
+        return (v for tT in [tile, tile.T] for v in [np.rot90(tT, i) for i in range(4)])
+
+    def edge_orientations(tile):
+        """representations of [left, right, top, bottom] edges"""
+        return [
+            int("".join(map(str, i)), 2)
+            for v in orientations(tile)
+            for i in [v[:, 0], v[:, -1], v[0], v[-1]]  # LRTB
+        ]
+
+    edges = {k: edge_orientations(tile) for k, tile in x.items()}
+
+    edge_links = defaultdict(set)
+    for k, es in edges.items():
+        for e in es:
+            edge_links[e].add(k)
+    g = nx.Graph()
+    for v in edge_links.values():
+        assert len(v) in [1, 2]
+        if len(v) == 2:
+            g.add_edge(*v)
+    g = g.subgraph(g.nodes)
+
+    W = int(len(x) ** 0.5)
+    grid = np.zeros((W, W), dtype=int)
+    coord = nx.kamada_kawai_layout(
+        g, center=((W - 1) / 2, (W - 1) / 2), scale=(W - 1) / 2
+    )
+    for k, ij in coord.items():
+        i, j = np.round(ij, 0).astype(int)
+        grid[j, i] = k
+    res1 = np.prod([grid[j, i] for j, i in product([0, -1], [0, -1])])
+
+    img = np.empty((W * 8, W * 8), dtype=np.uint8)
+    for j in range(W):
+        for i in range(W):
+            es = edges[grid[j, i]]
+            valid = np.ones(len(es) // 4, dtype=np.bool)
+            if 0 < i:  # left
+                assert {grid[j, i], grid[j, i - 1]} in edge_links.values()
+                valid &= [e in edges[grid[j, i - 1]] for e in es[::4]]
+            if i < W - 1:  # right
+                assert {grid[j, i], grid[j, i + 1]} in edge_links.values()
+                valid &= [e in edges[grid[j, i + 1]] for e in es[1::4]]
+            if 0 < j:  # top
+                assert {grid[j, i], grid[j - 1, i]} in edge_links.values()
+                valid &= [e in edges[grid[j - 1, i]] for e in es[2::4]]
+            if j < W - 1:  # bottom
+                assert {grid[j, i], grid[j + 1, i]} in edge_links.values()
+                valid &= [e in edges[grid[j + 1, i]] for e in es[3::4]]
+            assert sum(valid) == 1
+            valid = np.where(valid)[0][0]
+            tile = next(islice(orientations(x[grid[j, i]]), valid, valid + 1))
+            img[j * 8 : (j + 1) * 8, i * 8 : (i + 1) * 8] = tile[1:-1, 1:-1]
+    for i in orientations(img):
+        detected = convolve(i, obj, mode="constant") == obj.sum()
+        if any(detected.flat):
+            res2 = int(i.sum() - detected.sum() * obj.sum())
+            break
 
     return res1, res2
 
