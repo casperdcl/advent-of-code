@@ -6,9 +6,10 @@ Arguments:
   <day>  : [default: 1:int]
 """
 import re
-from collections import defaultdict, deque
+from collections import Counter, defaultdict, deque
+from collections.abc import Iterable
 from functools import lru_cache, partial, reduce
-from itertools import combinations, islice, product
+from itertools import chain, combinations, islice, product
 from textwrap import dedent
 from time import time
 
@@ -733,6 +734,47 @@ def day20():
         if any(detected.flat):
             res2 = int(i.sum() - detected.sum() * obj.sum())
             break
+
+    return res1, res2
+
+
+def is_iter(x):
+    return isinstance(x, Iterable) and not isinstance(x, (str, bytes))
+
+
+def flat(arr, dtype=lambda x: x):
+    """
+   dtype (callable): e.g. list, tuple, (default: generator)
+   >>> flat([1, [2, 3, [4, 5], [6], 7], ["8.00"]], tuple)
+   (1, 2, 3, 4, 5, 6, 7, '8.00')
+   """
+    if is_iter(arr):
+        return dtype(chain(*(i if is_iter(i) else [i] for i in map(flat, arr))))
+    return arr
+
+
+def day21():
+    """Ingredient allergens."""
+    d = open("21.txt").read().strip().split("\n")
+    allergens = {}
+    ingredients = Counter()
+    for i in d:
+        ings, alls = i[:-1].split(" (contains ")
+        ings = ings.split()
+        ingredients.update(ings)
+        ings = set(ings)
+        for a in alls.split(", "):
+            i = allergens.setdefault(a, ings.copy())
+            i &= ings
+    harmless = set(ingredients) - flat(allergens.values(), set)
+    res1 = sum(v for k, v in ingredients.items() if k in harmless)
+
+    bad = [v for k, v in sorted(allergens.items())]
+    while any(len(i) > 1 for i in bad):
+        singles = {list(i)[0] for i in bad if len(i) == 1}
+        for d in (i for i in bad if len(i) > 1):
+            d -= singles
+    res2 = ",".join(flat(bad))
 
     return res1, res2
 
