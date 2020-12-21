@@ -766,13 +766,13 @@ def day21():
         for a in alls.split(", "):
             i = allergens.setdefault(a, ings.copy())
             i &= ings
-    harmless = set(ingredients) - flat(allergens.values(), set)
-    res1 = sum(v for k, v in ingredients.items() if k in harmless)
+    safe = set(ingredients) - flat(allergens.values(), set)
+    res1 = sum(v for k, v in ingredients.items() if k in safe)
 
     bad = [v for k, v in sorted(allergens.items())]
     while any(len(i) > 1 for i in bad):
-        singles = {list(i)[0] for i in bad if len(i) == 1}
-        for d in (i for i in bad if len(i) > 1):
+        singles = flat(filter(lambda i: len(i) == 1, bad), set)
+        for d in filter(lambda i: len(i) > 1, bad):
             d -= singles
     res2 = ",".join(flat(bad))
 
