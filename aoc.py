@@ -8,7 +8,6 @@ Arguments:
 import re
 from collections import Counter, defaultdict, deque
 from collections.abc import Iterable
-from copy import deepcopy
 from functools import lru_cache, partial, reduce
 from itertools import chain, combinations, islice, product
 from textwrap import dedent
@@ -786,32 +785,22 @@ def day22():
         deque(map(int, i.split("\n")[1:]))
         for i in open("22.txt").read().strip().split("\n\n")
     ]
-    p1, p2 = deepcopy(players)
-    while len(p1) and len(p2):
-        c1, c2 = p1.popleft(), p2.popleft()
-        if c2 > c1:
-            p2.extend([c2, c1])
-        else:
-            p1.extend([c1, c2])
-    res1 = sum(np.prod(list(enumerate(reversed(p1 or p2), 1)), axis=1))
-
-    p1, p2 = deepcopy(players)
     seen = defaultdict(set)
 
-    def subgame(p1, p2, i):
-        # seen[i].clear()
+    def subgame(p1, p2, rec):
+        # seen[rec].clear()
         while len(p1) and len(p2):
             state = tuple(p1), tuple(p2)
-            if state in seen[i]:
+            if state in seen[rec]:
                 c1, c2 = p1.popleft(), p2.popleft()
                 p1.extend([c1, c2])
-                return p1 if i else (p1, p2)
+                return p1 if rec > 0 else (p1, p2)
             else:
-                seen[i].add(state)
+                seen[rec].add(state)
                 c1, c2 = p1.popleft(), p2.popleft()
-                if len(p1) >= c1 and len(p2) >= c2:
+                if rec >= 0 and len(p1) >= c1 and len(p2) >= c2:
                     win1 = subgame(
-                        deque(islice(p1, 0, c1)), deque(islice(p2, 0, c2)), i + 1
+                        deque(islice(p1, 0, c1)), deque(islice(p2, 0, c2)), rec + 1
                     )
                 else:
                     win1 = c1 > c2
@@ -819,9 +808,13 @@ def day22():
                 p1.extend([c1, c2])
             else:
                 p2.extend([c2, c1])
-        return p1 if i else (p1, p2)
+        return p1 if rec > 0 else (p1, p2)
 
-    p1, p2 = subgame(p1, p2, 0)
+    p1, p2 = subgame(players[0].copy(), players[1].copy(), -1)
+    res1 = sum(np.prod(list(enumerate(reversed(p1 or p2), 1)), axis=1))
+
+    seen[0].clear()
+    p1, p2 = subgame(players[0], players[1], 0)
     res2 = sum(np.prod(list(enumerate(reversed(p1 or p2), 1)), axis=1))
 
     return res1, res2
