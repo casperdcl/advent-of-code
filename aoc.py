@@ -546,6 +546,9 @@ def day16():
     return res1, res2
 
 
+conv = partial(convolve, mode="constant")
+
+
 def day17():
     """Game of Life 4D."""
     x = np.asanyarray(
@@ -562,7 +565,7 @@ def day17():
     knl[1, 1, 1] = 0
 
     def epoch(old):
-        adj = convolve(old, knl, mode="constant")
+        adj = conv(old, knl)
         new = (((adj == 2) | (adj == 3)) & (old == 1)) | ((old == 0) & (adj == 3))
         return new.astype(old.dtype)
 
@@ -730,7 +733,7 @@ def day20():
             tile = next(islice(orientations(x[grid[j, i]]), valid, valid + 1))
             img[j * 8 : (j + 1) * 8, i * 8 : (i + 1) * 8] = tile[1:-1, 1:-1]
     for i in orientations(img):
-        detected = convolve(i, obj, mode="constant") == obj.sum()
+        detected = conv(i, obj) == obj.sum()
         if any(detected.flat):
             res2 = int(i.sum() - detected.sum() * obj.sum())
             break
@@ -887,7 +890,7 @@ def day24():
     im = np.pad(im, ((epochs, epochs), (2 * epochs, 2 * epochs)))
 
     for _ in range(epochs):
-        adj = convolve(im, knlAdj, mode="constant")
+        adj = conv(im, knlAdj)
         im[(im == 1) & ((adj == 0) | (adj > 2))] = 0
         im[(im == 0) & (adj == 2)] = 1
     res2 = im.sum()
