@@ -859,6 +859,42 @@ def day23():
     return res1, res2
 
 
+def day24():
+    """Game of Hexagons."""
+    d = [
+        Counter(re.findall(r"([ns]?[ew])", i))
+        for i in open("24.txt").read().strip().split()
+    ]
+    yx_counts = Counter(
+        (
+            i["ne"] + i["nw"] - i["sw"] - i["se"],
+            (i["e"] - i["w"]) * 2 + i["ne"] + i["se"] - i["nw"] - i["sw"],
+        )
+        for i in d
+    )
+    yx = np.array([k for k, v in yx_counts.items() if v % 2], dtype=int)
+    res1 = len(yx)
+
+    knlAdj = np.zeros((3, 5), dtype=np.int8)
+    knlAdj[1, [0, 4]] = 1  # w e
+    knlAdj[2, [1, 3]] = 1  # nw ne
+    knlAdj[0, [1, 3]] = 1  # sw se
+
+    im = np.zeros(yx.ptp(axis=0) + 1, dtype=np.int8)
+    yx -= yx.min(axis=0)
+    im[yx[:, 0], yx[:, 1]] = 1
+    epochs = 100
+    im = np.pad(im, ((epochs, epochs), (2 * epochs, 2 * epochs)))
+
+    for _ in range(epochs):
+        adj = convolve(im, knlAdj, mode="constant")
+        im[(im == 1) & ((adj == 0) | (adj > 2))] = 0
+        im[(im == 0) & (adj == 2)] = 1
+    res2 = im.sum()
+
+    return res1, res2
+
+
 parser = argopt(__doc__)
 
 
