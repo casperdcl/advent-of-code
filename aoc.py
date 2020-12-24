@@ -817,6 +817,48 @@ def day22():
     return res1, res2
 
 
+def day23():
+    """Circular linked list reordering."""
+    d = [int(i) - 1 for i in open("23.txt").read().strip()]
+    assert set(d) == set(range(len(d)))
+
+    x = [None] * len(d)  # linked list
+    for cur, nxt in zip(d, d[1:] + d[:1]):
+        x[cur] = nxt
+
+    def gen(x, start=0):
+        i = x[start]
+        for _ in range(len(x) - 1):
+            yield i
+            i = x[i]
+
+    def run(epochs, start, progress=False):
+        lab = start
+        N = len(x)
+        for _ in trange(epochs, disable=not progress):
+            nxt1 = x[lab]
+            nxt2 = x[nxt1]
+            nxt3 = x[nxt2]
+            dst = (lab - 1) % N
+            while dst in (nxt1, nxt2, nxt3):
+                dst = (dst - 1) % N
+            x[lab], x[dst], x[nxt3] = x[nxt3], nxt1, x[dst]
+            lab = x[lab]
+        return gen(x)
+
+    res1 = int("".join(str(i + 1) for i in run(100, d[0])))
+
+    N = int(1e6)
+    x = list(range(1, N + 1))
+    for cur, nxt in zip(d, d[1:]):
+        x[cur] = nxt
+    x[d[-1]], x[-1] = len(d), d[0]
+    res2 = run(int(1e7), d[0], True)
+    res2 = np.prod([next(res2) + 1 for _ in range(2)])
+
+    return res1, res2
+
+
 parser = argopt(__doc__)
 
 
