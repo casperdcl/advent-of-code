@@ -3,6 +3,8 @@
 Solutions to problems from <https://adventofcode.com/2020>.
 
 ```sh
+conda env create
+conda activate aoc
 python3 aoc.py --help
 ```
 

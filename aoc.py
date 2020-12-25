@@ -3,7 +3,7 @@
   aoc [<day>...]
 
 Arguments:
-  <day>  : [default: 1:int]
+  <day>  : [default: -1:int], negative for all
 """
 import re
 from collections import Counter, defaultdict, deque
@@ -929,7 +929,10 @@ parser = argopt(__doc__)
 
 def main(argv=None):
     args = parser.parse_args(argv)
-    for day in [args.day] if isinstance(args.day, int) else args.day:
+    days = [args.day] if isinstance(args.day, int) else args.day
+    if any(i < 1 for i in days):
+        days = range(1, 26)
+    for day in days:
         func = globals()[f"day{day:d}"]
         doc = dedent(func.__doc__).replace("\n", "\n  ").strip()
         t = time()
