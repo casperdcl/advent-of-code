@@ -9,7 +9,7 @@ import re
 from collections import Counter, defaultdict, deque
 from collections.abc import Iterable
 from functools import lru_cache, partial, reduce
-from itertools import chain, combinations, islice, product
+from itertools import chain, combinations, count, islice, product
 from textwrap import dedent
 from time import time
 
@@ -894,6 +894,32 @@ def day24():
         im[(im == 1) & ((adj == 0) | (adj > 2))] = 0
         im[(im == 0) & (adj == 2)] = 1
     res2 = im.sum()
+
+    return res1, res2
+
+
+def day25():
+    """Decrypting public keys."""
+    cpub, dpub = map(int, open("25.txt").read().strip().split())
+
+    def transform(subj, loop_size):
+        val = 1
+        for _ in range(loop_size):
+            val = (val * subj) % 20201227
+        return val
+
+    def itransform(subj, target):
+        val = 1
+        for i in count(1):
+            val = (val * subj) % 20201227
+            if val == target:
+                return i
+
+    cloop = itransform(7, cpub)
+    dloop = itransform(7, dpub)
+    res1 = transform(dpub, cloop)
+    res2 = transform(cpub, dloop)
+    assert res1 == res2
 
     return res1, res2
 
