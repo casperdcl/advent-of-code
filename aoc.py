@@ -829,7 +829,7 @@ def day23():
     def run(epochs, start, progress=False):
         lab = start
         N = len(x)
-        for _ in trange(epochs, disable=not progress):
+        for _ in trange(epochs, disable=not progress, unit_scale=True):
             nxt1 = x[lab]
             nxt2 = x[nxt1]
             nxt3 = x[nxt2]
