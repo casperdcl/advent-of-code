@@ -125,13 +125,7 @@ def day5():
 
 def intersection(sets):
     """Intersection of all given sets"""
-    res = None
-    for i in sets:
-        if res is None:
-            res = i
-        else:
-            res &= i
-    return res
+    return reduce(lambda x, y: x & y, sets)
 
 
 def day6():
@@ -302,14 +296,13 @@ def day11():
 
     def epoch(old):
         new = list(map(list, old))
-        for j in range(h):
-            for i in range(w):
-                if old[j][i] == "L":
-                    if "#" not in adj(old, j, i):
-                        new[j][i] = "#"
-                elif old[j][i] == "#":
-                    if "".join(adj(old, j, i)).count("#") >= 4:
-                        new[j][i] = "L"
+        for j, i in product(range(h), range(w)):
+            if old[j][i] == "L":
+                if "#" not in adj(old, j, i):
+                    new[j][i] = "#"
+            elif old[j][i] == "#":
+                if "".join(adj(old, j, i)).count("#") >= 4:
+                    new[j][i] = "L"
         return new
 
     res1 = sum(i.count("#") for i in repeat_until_stable(epoch, x))
@@ -336,14 +329,13 @@ def day11():
 
     def epoch2(old):
         new = list(map(list, old))
-        for j in range(h):
-            for i in range(w):
-                if old[j][i] == "L":
-                    if not see(old, j, i):
-                        new[j][i] = "#"
-                elif old[j][i] == "#":
-                    if see(old, j, i) >= 5:
-                        new[j][i] = "L"
+        for j, i in product(range(h), range(w)):
+            if old[j][i] == "L":
+                if not see(old, j, i):
+                    new[j][i] = "#"
+            elif old[j][i] == "#":
+                if see(old, j, i) >= 5:
+                    new[j][i] = "L"
         return new
 
     res2 = sum(i.count("#") for i in repeat_until_stable(epoch2, x))
@@ -712,26 +704,25 @@ def day20():
     res1 = np.prod([grid[j, i] for j, i in product([0, -1], [0, -1])])
 
     img = np.empty((W * 8, W * 8), dtype=np.uint8)
-    for j in range(W):
-        for i in range(W):
-            es = edges[grid[j, i]]
-            valid = np.ones(len(es) // 4, dtype=np.bool)
-            if 0 < i:  # left
-                assert {grid[j, i], grid[j, i - 1]} in edge_links.values()
-                valid &= [e in edges[grid[j, i - 1]] for e in es[::4]]
-            if i < W - 1:  # right
-                assert {grid[j, i], grid[j, i + 1]} in edge_links.values()
-                valid &= [e in edges[grid[j, i + 1]] for e in es[1::4]]
-            if 0 < j:  # top
-                assert {grid[j, i], grid[j - 1, i]} in edge_links.values()
-                valid &= [e in edges[grid[j - 1, i]] for e in es[2::4]]
-            if j < W - 1:  # bottom
-                assert {grid[j, i], grid[j + 1, i]} in edge_links.values()
-                valid &= [e in edges[grid[j + 1, i]] for e in es[3::4]]
-            assert sum(valid) == 1
-            valid = np.where(valid)[0][0]
-            tile = next(islice(orientations(x[grid[j, i]]), valid, valid + 1))
-            img[j * 8 : (j + 1) * 8, i * 8 : (i + 1) * 8] = tile[1:-1, 1:-1]
+    for j, i in product(range(W), range(W)):
+        es = edges[grid[j, i]]
+        valid = np.ones(len(es) // 4, dtype=np.bool)
+        if 0 < i:  # left
+            assert {grid[j, i], grid[j, i - 1]} in edge_links.values()
+            valid &= [e in edges[grid[j, i - 1]] for e in es[::4]]
+        if i < W - 1:  # right
+            assert {grid[j, i], grid[j, i + 1]} in edge_links.values()
+            valid &= [e in edges[grid[j, i + 1]] for e in es[1::4]]
+        if 0 < j:  # top
+            assert {grid[j, i], grid[j - 1, i]} in edge_links.values()
+            valid &= [e in edges[grid[j - 1, i]] for e in es[2::4]]
+        if j < W - 1:  # bottom
+            assert {grid[j, i], grid[j + 1, i]} in edge_links.values()
+            valid &= [e in edges[grid[j + 1, i]] for e in es[3::4]]
+        assert sum(valid) == 1
+        valid = np.where(valid)[0][0]
+        tile = next(islice(orientations(x[grid[j, i]]), valid, valid + 1))
+        img[j * 8 : (j + 1) * 8, i * 8 : (i + 1) * 8] = tile[1:-1, 1:-1]
     for i in orientations(img):
         detected = conv(i, obj) == obj.sum()
         if any(detected.flat):
