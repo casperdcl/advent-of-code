@@ -3,7 +3,7 @@
   aoc [<day>...]
 
 Arguments:
-  <day>  : [default: -1:int], negative for all
+  <day>  : [default: 0:int], use <1 for all
 """
 import re
 from collections import Counter, defaultdict, deque
