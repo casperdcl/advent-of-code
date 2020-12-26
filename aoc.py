@@ -567,7 +567,7 @@ def day17():
     res1 = res1.sum()
 
     res2 = np.pad([x], ((6, 6),) + ((0, 0),) * 3)
-    knl = np.pad([knl], ((6, 6),) + ((0, 0),) * 3)
+    knl = np.pad([knl], ((1, 1),) + ((0, 0),) * 3)
     knl[::2] = 1
     for _ in range(6):
         res2 = epoch(res2)
