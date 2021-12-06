@@ -1,22 +1,12 @@
-#!/usr/bin/env python3
-"""Usage:
-  aoc [<day>...]
-
-Arguments:
-  <day>  : [default: 0:int], use <1 for all
-"""
 import re
 from collections import Counter, defaultdict, deque
 from collections.abc import Iterable
 from functools import lru_cache, partial, reduce
 from itertools import chain, combinations, count, islice, product
-from textwrap import dedent
-from time import time
 
 import networkx as nx
 import numpy as np
 import yaml
-from argopt import argopt
 from scipy.ndimage import convolve
 from tqdm import trange
 
@@ -913,22 +903,3 @@ def day25():
     assert res1 == res2
 
     return res1, res2
-
-
-parser = argopt(__doc__)
-
-
-def main(argv=None):
-    args = parser.parse_args(argv)
-    days = [args.day] if isinstance(args.day, int) else args.day
-    if any(i < 1 for i in days):
-        days = range(1, 26)
-    for day in days:
-        func = globals()[f"day{day:d}"]
-        doc = dedent(func.__doc__).replace("\n", "\n  ").strip()
-        t = time()
-        print(f"{day} {doc} {func()} {time() - t:.2f}s")
-
-
-if __name__ == "__main__":
-    main()
