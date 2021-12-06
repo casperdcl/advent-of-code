@@ -28,7 +28,10 @@ def main(argv=None):
     mod = import_module(f"aoc.{sol}")
     chdir(Path(__file__).parent / sol)
     for day in days:
-        func = getattr(mod, f"day{day:d}")
+        try:
+            func = getattr(mod, f"day{day:d}")
+        except AttributeError:
+            break
         doc = dedent(func.__doc__).replace("\n", "\n  ").strip()
         t = time()
         print(f"{day} {doc} {func()} {time() - t:.2f}s")
