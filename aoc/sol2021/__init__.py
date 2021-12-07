@@ -120,3 +120,20 @@ def day5():
     res2 = (grid > 1).sum()
 
     return res1, res2
+
+
+def day6():
+    """Exponential population growth."""
+    x = Counter(np.loadtxt("6.txt", delimiter=",", dtype=np.int8))
+
+    for i in range(256):
+        x = {k - 1: v for k, v in x.items()}
+        if -1 in x:
+            x[8] = x[-1]
+            x.setdefault(6, 0)
+            x[6] += x.pop(-1)
+        if i == 79:
+            res1 = sum(x.values())
+    res2 = sum(x.values())
+
+    return res1, res2
