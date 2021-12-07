@@ -1,3 +1,5 @@
+from collections import Counter
+
 import numpy as np
 
 from ..sol2020 import conv
@@ -31,5 +33,36 @@ def day2():
             else:
                 res2 += (directions[d] + aim) * int(val)
     res2 = int(res2.real * res2.imag)
+
+    return res1, res2
+
+
+def day3():
+    """Most common bits."""
+    x = np.asarray(
+        [list(map(int, num.strip())) for num in open("3.txt")], dtype=np.bool
+    )
+
+    def most_common(arr):
+        """`max(Counter(arr).most_common())[0]` with tie-break using values"""
+        return max(((num, val) for val, num in Counter(arr).most_common()))[1]
+
+    most = np.array([most_common(i) for i in x.T])
+
+    def binlist2int(arr):
+        return sum(2 ** i * v for i, v in enumerate(reversed(arr)))
+
+    res1 = binlist2int(most) * binlist2int(~most)
+
+    o2, co2 = x, x
+    for i in range(x.shape[1]):
+        if len(o2) > 1:
+            o2 = o2[o2[:, i] == most_common(o2[:, i])]
+        if len(co2) > 1:
+            co2 = co2[co2[:, i] != most_common(co2[:, i])]
+
+    res2 = np.prod(list(map(binlist2int, [o2[0], co2[0]])))
+
+    return res1, res2
 
     return res1, res2
