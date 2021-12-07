@@ -728,10 +728,10 @@ def is_iter(x):
 
 def flat(arr, dtype=lambda x: x):
     """
-   dtype (callable): e.g. list, tuple, (default: generator)
-   >>> flat([1, [2, 3, [4, 5], [6], 7], ["8.00"]], tuple)
-   (1, 2, 3, 4, 5, 6, 7, '8.00')
-   """
+    dtype (callable): e.g. list, tuple, (default: generator)
+    >>> flat([1, [2, 3, [4, 5], [6], 7], ["8.00"]], tuple)
+    (1, 2, 3, 4, 5, 6, 7, '8.00')
+    """
     if is_iter(arr):
         return dtype(chain(*(i if is_iter(i) else [i] for i in map(flat, arr))))
     return arr
