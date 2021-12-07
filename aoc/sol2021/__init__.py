@@ -1,3 +1,4 @@
+import re
 from collections import Counter
 
 import numpy as np
@@ -94,5 +95,28 @@ def day4():
 
             res2 = boards[last][~marked[last]].sum() * d
             break
+
+    return res1, res2
+
+
+def day5():
+    """Counting line intersections."""
+    crds = np.array(
+        [list(map(int, re.split(r"[^\d]+", i.strip()))) for i in open("5.txt")],
+        dtype=np.int32,
+    )
+    grid = np.zeros((crds[:, ::2].max() + 1, crds[:, 1::2].max() + 1), dtype=np.int32)
+    for x0, y0, x1, y1 in crds:
+        if x0 == x1 or y0 == y1:  # horiz/vert
+            grid[min(y0, y1) : max(y0, y1) + 1, min(x0, x1) : max(x0, x1) + 1] += 1
+    res1 = (grid > 1).sum()
+
+    for x0, y0, x1, y1 in crds:
+        if abs(x1 - x0) == abs(y1 - y0):  # diag
+            yd = 1 if y1 >= y0 else -1
+            xd = 1 if x1 >= x0 else -1
+            for y, x in zip(range(y0, y1 + yd, yd), range(x0, x1 + xd, xd)):
+                grid[y, x] += 1
+    res2 = (grid > 1).sum()
 
     return res1, res2
