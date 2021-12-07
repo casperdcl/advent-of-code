@@ -137,3 +137,18 @@ def day6():
     res2 = sum(x.values())
 
     return res1, res2
+
+
+def day7():
+    """Minimum total cost."""
+    x = np.loadtxt("7.txt", delimiter=",", dtype=np.int16)
+
+    res1 = min(sum(abs(x - i)) for i in range(max(x) + 1))
+
+    costs = np.zeros((max(x) + 1,), dtype=np.uint32)
+    costs[1] = 1
+    for i in range(2, len(costs)):
+        costs[i] = costs[i - 1] + i
+    res2 = min(sum(costs[abs(x - i)]) for i in range(max(x) + 1))
+
+    return res1, res2
