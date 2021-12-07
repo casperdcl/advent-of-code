@@ -2,7 +2,7 @@ from collections import Counter
 
 import numpy as np
 
-from ..sol2020 import conv
+from aoc.sol2020 import conv
 
 
 def day1():
@@ -64,5 +64,35 @@ def day3():
     res2 = np.prod(list(map(binlist2int, [o2[0], co2[0]])))
 
     return res1, res2
+
+
+def day4():
+    """Winning & losing Bingo."""
+    draws, boards = open("4.txt").read().strip().split("\n\n", 1)
+    draws = [int(i) for i in draws.split(",")]
+    boards = np.array(
+        [[j.split() for j in i.split("\n")] for i in boards.split("\n\n")],
+        dtype=np.int32,
+    )
+    marked = np.zeros(boards.shape, bool)
+
+    for d in draws:
+        marked[boards == d] = 1
+        wins = marked.all(axis=1).any(axis=1) | marked.all(axis=2).any(axis=1)
+        if any(wins):
+            res1 = boards[wins][~marked[wins]].sum() * d
+            break
+
+    marked[:] = 0
+    for d in draws:
+        marked[boards == d] = 1
+        wins = marked.all(axis=1).any(axis=1) | marked.all(axis=2).any(axis=1)
+        if all(wins):
+            marked[boards == d] = 0  # undo
+            last = ~(marked.all(axis=1).any(axis=1) | marked.all(axis=2).any(axis=1))
+            marked[boards == d] = 1  # redo
+
+            res2 = boards[last][~marked[last]].sum() * d
+            break
 
     return res1, res2
