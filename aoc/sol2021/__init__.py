@@ -20,7 +20,7 @@ def day2():
     """2D navigation."""
     directions = {"forward": 1, "up": -1j, "down": 1j}
     with open("2.txt") as fd:
-        x = [int(val) * directions[d] for i in fd for d, val in [i.split()]]
+        x = [int((d_val := i.split())[1]) * directions[d_val[0]] for i in fd]
     res1 = sum(x)
     res1 = int(res1.real * res1.imag)
 
@@ -75,7 +75,7 @@ def day4():
         [[j.split() for j in i.split("\n")] for i in boards.split("\n\n")],
         dtype=np.int32,
     )
-    marked = np.zeros(boards.shape, bool)
+    marked = np.zeros(boards.shape, dtype=np.bool)
 
     res1 = None
     for d in draws:
@@ -146,9 +146,8 @@ def day7(brute=False):
 
     if brute:
         res2 = min(
-            sum(costs * (costs + 1) // 2)
+            sum((costs := abs(x - i).astype(np.int32)) * (costs + 1) // 2)
             for i in range(max(x) + 1)
-            for costs in [abs(x - i).astype(np.int32)]
         )
     costs = abs(x - x.mean().astype(np.int16)).astype(np.int32)
     res2 = sum(costs * (costs + 1) // 2)
@@ -158,8 +157,12 @@ def day7(brute=False):
 
 def day8(brute=False):
     """Deducing 7-segment displays."""
+
+    def sort_str(s):
+        return "".join(sorted(s))
+
     x = [
-        [["".join(sorted(k)) for k in j.strip().split()] for j in i.split(" | ")]
+        [[sort_str(k) for k in j.strip().split()] for j in i.split(" | ")]
         for i in open("8.txt")
     ]
 
@@ -184,9 +187,9 @@ def day8(brute=False):
             res1 += sum(len(i) in {2, 3, 4, 7} for i in out)
             for perm in permutations("abcdefg"):
                 tab = str.maketrans("abcdefg", "".join(perm))
-                src_trans = ("".join(sorted(i.translate(tab))) for i in src)
+                src_trans = (sort_str(i.translate(tab)) for i in src)
                 if all(i in maps for i in src_trans):
-                    out_trans = ("".join(sorted(i.translate(tab))) for i in out)
+                    out_trans = (sort_str(i.translate(tab)) for i in out)
                     res2 += [maps[i] for i in out_trans]
                     break
         res2 = sum(10 ** i * v for i, v in enumerate(res2[::-1]))
