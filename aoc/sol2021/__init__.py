@@ -154,13 +154,44 @@ def day7():
     return res1, res2
 
 
-def day8():
+def day8(brute=False):
     """Deducing 7-segment displays."""
     x = [
         [["".join(sorted(k)) for k in j.strip().split()] for j in i.split(" | ")]
         for i in open("8.txt")
     ]
 
+    # Brute force translation table solution
+    if brute:
+        from itertools import permutations
+
+        maps = {
+            "abcefg": 0,
+            "cf": 1,
+            "acdeg": 2,
+            "acdfg": 3,
+            "bcdf": 4,
+            "abdfg": 5,
+            "abdefg": 6,
+            "acf": 7,
+            "abcdefg": 8,
+            "abcdfg": 9,
+        }
+        res1, res2 = 0, np.zeros((4,), dtype=np.int32)
+        for src, out in x:
+            res1 += sum(len(i) in {2, 3, 4, 7} for i in out)
+            for perm in permutations("abcdefg"):
+                tab = str.maketrans("abcdefg", "".join(perm))
+                src_trans = ("".join(sorted(i.translate(tab))) for i in src)
+                if all(i in maps for i in src_trans):
+                    out_trans = ("".join(sorted(i.translate(tab))) for i in out)
+                    res2 += [maps[i] for i in out_trans]
+                    break
+        res2 = sum(10 ** i * v for i, v in enumerate(res2[::-1]))
+
+        return res1, res2
+
+    # 100x faster manual solution
     segs = {2: 1, 4: 4, 3: 7, 7: 8}
     res1 = sum(len([len(i) for i in out if len(i) in segs]) for _, out in x)
 
@@ -171,7 +202,7 @@ def day8():
         6: {0, 4, 5, 6, 8, 9},
         4: {0, 2, 6, 8},
     }
-    res2 = 0
+    res2 = np.zeros((4,), dtype=np.int32)
     for src, out in x:
         maps = {}
         # 1, 4, 7, 8
@@ -215,6 +246,9 @@ def day8():
 
         assert all(len(i) == 1 for i in maps.values())
         maps = {k: v.pop() for k, v in maps.items()}
-        res2 += sum(10 ** i * maps[disp] for i, disp in enumerate(out[::-1]))
+        res2 += [maps[disp] for disp in out]
+    res2 = sum(10 ** i * v for i, v in enumerate(res2[::-1]))
+
+    return res1, res2
 
     return res1, res2
