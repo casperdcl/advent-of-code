@@ -77,22 +77,16 @@ def day4():
     )
     marked = np.zeros(boards.shape, bool)
 
+    res1 = None
     for d in draws:
         marked[boards == d] = 1
         wins = marked.all(axis=1).any(axis=1) | marked.all(axis=2).any(axis=1)
-        if any(wins):
+        if res1 is None and any(wins):
             res1 = boards[wins][~marked[wins]].sum() * d
-            break
-
-    marked[:] = 0
-    for d in draws:
-        marked[boards == d] = 1
-        wins = marked.all(axis=1).any(axis=1) | marked.all(axis=2).any(axis=1)
-        if all(wins):
+        elif all(wins):
             marked[boards == d] = 0  # undo
             last = ~(marked.all(axis=1).any(axis=1) | marked.all(axis=2).any(axis=1))
             marked[boards == d] = 1  # redo
-
             res2 = boards[last][~marked[last]].sum() * d
             break
 
@@ -126,30 +120,38 @@ def day6():
     """Exponential population growth."""
     x = Counter(np.loadtxt("6.txt", delimiter=",", dtype=np.int8))
 
-    for i in range(256):
-        x = {k - 1: v for k, v in x.items()}
-        if -1 in x:
-            x[8] = x[-1]
-            x.setdefault(6, 0)
-            x[6] += x.pop(-1)
-        if i == 79:
-            res1 = sum(x.values())
-    res2 = sum(x.values())
+    nums = [0] * 9
+    for i, num in x.items():
+        nums[i] = num
+    for day in range(256):
+        spawn = nums[0]
+        for i in range(8):
+            nums[i] = nums[i + 1]
+        nums[8] = spawn
+        nums[6] += spawn
+        if day == 79:
+            res1 = sum(nums)
+    res2 = sum(nums)
 
     return res1, res2
 
 
-def day7():
+def day7(brute=False):
     """Minimum total cost."""
     x = np.loadtxt("7.txt", delimiter=",", dtype=np.int16)
 
-    res1 = min(sum(abs(x - i)) for i in range(max(x) + 1))
+    if brute:
+        res1 = min(sum(abs(x - i)) for i in range(max(x) + 1))
+    res1 = sum(abs(x - np.median(x).astype(np.int16)))
 
-    costs = np.zeros((max(x) + 1,), dtype=np.uint32)
-    costs[1] = 1
-    for i in range(2, len(costs)):
-        costs[i] = costs[i - 1] + i
-    res2 = min(sum(costs[abs(x - i)]) for i in range(max(x) + 1))
+    if brute:
+        res2 = min(
+            sum(costs * (costs + 1) // 2)
+            for i in range(max(x) + 1)
+            for costs in [abs(x - i).astype(np.int32)]
+        )
+    costs = abs(x - x.mean().astype(np.int16)).astype(np.int32)
+    res2 = sum(costs * (costs + 1) // 2)
 
     return res1, res2
 
