@@ -152,3 +152,69 @@ def day7():
     res2 = min(sum(costs[abs(x - i)]) for i in range(max(x) + 1))
 
     return res1, res2
+
+
+def day8():
+    """Deducing 7-segment displays."""
+    x = [
+        [["".join(sorted(k)) for k in j.strip().split()] for j in i.split(" | ")]
+        for i in open("8.txt")
+    ]
+
+    segs = {2: 1, 4: 4, 3: 7, 7: 8}
+    res1 = sum(len([len(i) for i in out if len(i) in segs]) for _, out in x)
+
+    seg_appearances = {
+        9: {0, 1, 3, 4, 5, 6, 7, 8, 9},
+        8: {0, 2, 3, 5, 6, 7, 8, 9} | {0, 1, 2, 3, 4, 7, 8, 9},
+        7: {2, 3, 4, 5, 6, 8, 9} | {0, 2, 3, 5, 6, 8, 9},
+        6: {0, 4, 5, 6, 8, 9},
+        4: {0, 2, 6, 8},
+    }
+    res2 = 0
+    for src, out in x:
+        maps = {}
+        # 1, 4, 7, 8
+        for i in src:
+            if len(i) in segs:
+                maps[i] = {segs[len(i)]}
+
+        # 2, 3
+        for seg, num in Counter("".join(src)).items():
+            for i in src:
+                if seg in i:
+                    maps.setdefault(i, seg_appearances[num].copy())
+                    maps[i] &= seg_appearances[num]
+        sols = {list(i)[0] for i in maps.values() if len(i) == 1}
+        new_sols = {
+            val
+            for val, num in Counter(
+                j for i in maps.values() if len(i) > 1 for j in i
+            ).items()
+            if num == 1
+        }
+        for i in maps:
+            if maps[i] & new_sols:
+                maps[i] &= new_sols
+            elif len(maps[i]) > 1 and maps[i] & sols:
+                maps[i] -= sols
+
+        # 0, 5, 6, 9
+        seven = set(next(iter(k for k, c in maps.items() if c == {7})))
+        for k, candidates in maps.items():
+            if candidates == {0, 6}:
+                if len(set(k) & seven) == 3:
+                    candidates &= {0}
+                else:
+                    candidates &= {6}
+            elif candidates & {5, 9}:
+                if len(set(k) & seven) == 3:
+                    candidates &= {9}
+                else:
+                    candidates &= {5}
+
+        assert all(len(i) == 1 for i in maps.values())
+        maps = {k: v.pop() for k, v in maps.items()}
+        res2 += sum(10 ** i * maps[disp] for i, disp in enumerate(out[::-1]))
+
+    return res1, res2
