@@ -1,5 +1,6 @@
 import re
 from collections import Counter
+from itertools import permutations, product
 
 import numpy as np
 
@@ -168,8 +169,6 @@ def day8(brute=False):
 
     # Brute force translation table solution
     if brute:
-        from itertools import permutations
-
         maps = {
             "abcefg": 0,
             "cf": 1,
@@ -255,5 +254,45 @@ def day8(brute=False):
     res2 = sum(10 ** i * v for i, v in enumerate(res2[::-1]))
 
     return res1, res2
+
+
+def day9():
+    """2D segmentation."""
+    x = np.array(
+        [list(map(int, i)) for i in open("9.txt").read().strip().split()], dtype=np.int8
+    )
+
+    adj = np.zeros((4, 3, 3), dtype=x.dtype)
+    adj[0, 1, 0] = adj[1, 0, 1] = adj[2, 1, 2] = adj[3, 2, 1] = 1
+    lows = np.all([x < conv(x, a, cval=10) for a in adj], axis=0)
+    res1 = (x[lows] + 1).sum()
+
+    borders = x >= 9
+    visited = np.zeros_like(borders)
+
+    def basin_size(j, i):
+        if (
+            j < 0
+            or i < 0
+            or j >= visited.shape[0]
+            or i >= visited.shape[1]
+            or visited[j, i]
+            or borders[j, i]
+        ):
+            return 0
+        visited[j, i] = 1
+        return 1 + sum(
+            basin_size(j + b, i + a)
+            for b, a in product(range(-1, 2), repeat=2)
+            if abs(a) != abs(b)
+        )
+
+    res2 = np.prod(
+        sorted(
+            basin_size(j, i)
+            for j, i in product(range(x.shape[0]), range(x.shape[1]))
+            if lows[j, i]
+        )[-3:]
+    )
 
     return res1, res2
