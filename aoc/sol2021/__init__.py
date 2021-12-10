@@ -1,5 +1,6 @@
 import re
 from collections import Counter
+from functools import reduce
 from itertools import permutations, product
 
 import numpy as np
@@ -296,3 +297,25 @@ def day9():
     )
 
     return res1, res2
+
+
+def day10():
+    """Brace matching errors."""
+    x = open("10.txt").read().strip().split()
+    close = {")": "(", "]": "[", "}": "{", ">": "<"}
+    score_err = {")": 3, "]": 57, "}": 1197, ">": 25137}
+    score_end = {"(": 1, "[": 2, "{": 3, "<": 4}
+
+    res1, res2 = 0, []
+    for line in x:
+        last = []
+        for c in line:
+            if c in "([{<":
+                last.append(c)
+            elif close[c] != last.pop():
+                res1 += score_err[c]  # syntax error
+                break
+        else:  # missing closures
+            res2.append(reduce(lambda i, c: 5 * i + score_end[c], last[::-1], 0))
+
+    return res1, int(np.median(res2))
