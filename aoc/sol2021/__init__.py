@@ -334,13 +334,15 @@ def day11():
     for step in count(1):
         x += 1
         while True:
-            new = conv((cur := (x == 10)).astype(x.dtype), adj)
+            cur = x == 10  # flashing
+            new = conv(cur.astype(x.dtype), adj)
             new[x > 9] = 0
             if not new.any():  # no further energy increases
                 break
             x[cur] = 11  # max energy
             x[msk] = np.clip(x[msk := new.astype(bool)] + new[msk], 0, 10)
-        x[cur := (x > 9)] = 0  # reset max energy
+        cur = x > 9  # flashed
+        x[cur] = 0  # reset max energy
         if step <= 100:
             res1 += cur.sum()
         if cur.all():
