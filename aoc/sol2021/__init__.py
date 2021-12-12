@@ -1,8 +1,9 @@
 import re
-from collections import Counter
+from collections import Counter, defaultdict
 from functools import reduce
 from itertools import count, permutations, product
 
+import networkx as nx
 import numpy as np
 
 from aoc.sol2020 import conv
@@ -133,9 +134,8 @@ def day6():
         nums[6] += spawn
         if day == 79:
             res1 = sum(nums)
-    res2 = sum(nums)
 
-    return res1, res2
+    return res1, sum(nums)
 
 
 def day7(brute=False):
@@ -347,3 +347,30 @@ def day11():
             res1 += cur.sum()
         if cur.all():
             return res1, step
+
+
+def day12():
+    """Graph 2nd order paths."""
+    g = nx.Graph()
+    for i in open("12.txt"):
+        g.add_edge(*i.strip().split("-"))
+
+    def is_upper(s):
+        return s.upper() == s
+
+    def recurse(node="start", visited=None, allow_twice=False):
+        visited = defaultdict(int) if visited is None else visited.copy()
+        if not is_upper(node):
+            visited[node] += 1
+        res = 0
+        for n in g[node]:
+            if n == "end":
+                res += 1
+            elif n != "start":
+                if visited[n] < 1:
+                    res += recurse(n, visited, allow_twice)
+                elif allow_twice and visited[node] < 2 and visited[n] < 2:
+                    res += recurse(n, visited)
+        return res
+
+    return recurse(), recurse(allow_twice=True)
