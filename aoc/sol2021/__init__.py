@@ -1,5 +1,5 @@
 import re
-from collections import Counter, defaultdict
+from collections import Counter
 from functools import reduce
 from io import StringIO
 from itertools import count, permutations, product
@@ -360,17 +360,17 @@ def day12():
         return s.upper() == s
 
     def recurse(node="start", visited=None, allow_twice=False):
-        visited = defaultdict(int) if visited is None else visited.copy()
+        if node == "end":
+            return 1
+        visited = set() if visited is None else visited.copy()
         if not is_upper(node):
-            visited[node] += 1
+            visited |= {node}
         res = 0
         for n in g[node]:
-            if n == "end":
-                res += 1
-            elif n != "start":
-                if visited[n] < 1:
+            if n != "start":
+                if n not in visited:
                     res += recurse(n, visited, allow_twice)
-                elif allow_twice and visited[node] < 2 and visited[n] < 2:
+                elif allow_twice:
                     res += recurse(n, visited)
         return res
 
