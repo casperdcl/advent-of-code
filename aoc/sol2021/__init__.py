@@ -44,9 +44,7 @@ def day2():
 
 def day3():
     """Most common bits."""
-    x = np.asarray(
-        [list(map(int, num.strip())) for num in open("3.txt")], dtype=np.bool
-    )
+    x = np.asarray([list(map(int, num.strip())) for num in open("3.txt")], dtype=bool)
 
     def most_common(arr):
         """`max(Counter(arr).most_common())[0]` with tie-break using values"""
@@ -79,7 +77,7 @@ def day4():
         [[j.split() for j in i.split("\n")] for i in boards.split("\n\n")],
         dtype=np.int32,
     )
-    marked = np.zeros(boards.shape, dtype=np.bool)
+    marked = np.zeros(boards.shape, dtype=bool)
 
     res1 = None
     for d in draws:

@@ -696,7 +696,7 @@ def day20():
     img = np.empty((W * 8, W * 8), dtype=np.uint8)
     for j, i in product(range(W), range(W)):
         es = edges[grid[j, i]]
-        valid = np.ones(len(es) // 4, dtype=np.bool)
+        valid = np.ones(len(es) // 4, dtype=bool)
         if 0 < i:  # left
             assert {grid[j, i], grid[j, i - 1]} in edge_links.values()
             valid &= [e in edges[grid[j, i - 1]] for e in es[::4]]
