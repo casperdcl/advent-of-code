@@ -398,4 +398,4 @@ def day13():
 
     print("\n".join("".join("\u2588" if x else " " for x in y) for y in grid))
 
-    return res1, "^plot^"
+    return res1, f"^plot ({grid.sum()})^"
