@@ -13,3 +13,5 @@ dependencies:
 - ipykernel
 - pre-commit
 - argopt
+# test
+- pytest
