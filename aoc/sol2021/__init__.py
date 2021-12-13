@@ -1,6 +1,7 @@
 import re
 from collections import Counter, defaultdict
 from functools import reduce
+from io import StringIO
 from itertools import count, permutations, product
 
 import networkx as nx
@@ -54,7 +55,7 @@ def day3():
     most = np.array([most_common(i) for i in x.T])
 
     def binlist2int(arr):
-        return sum(2 ** i * v for i, v in enumerate(reversed(arr)))
+        return sum(2 ** i * v for i, v in enumerate(arr[::-1]))
 
     res1 = binlist2int(most) * binlist2int(~most)
 
@@ -374,3 +375,29 @@ def day12():
         return res
 
     return recurse(), recurse(allow_twice=True)
+
+
+def day13():
+    """Folding paper."""
+    xy, folds = open("13.txt").read().strip().split("\n\n")
+    xy = np.loadtxt(StringIO(xy), delimiter=",", dtype=np.int16)
+    folds = np.fromregex(
+        StringIO(folds), r"fold along ([xy])=(\d+)", [("ax", "U1"), ("i", np.int16)]
+    )
+    grid = np.zeros(xy.max(axis=0)[::-1] + 1, dtype=bool)
+    grid[xy[:, 1], xy[:, 0]] = True
+
+    res1 = None
+    for ax, i in folds:
+        if ax == "x":
+            f = grid[:, i + 1 :][:, ::-1]
+            grid = grid[:, :i] | np.pad(f, ((0, 0), (grid.shape[0] - f.shape[0], 0)))
+        else:
+            f = grid[i + 1 :][::-1]
+            grid = grid[:i] | np.pad(f, ((grid.shape[1] - f.shape[1], 0), (0, 0)))
+        if res1 is None:
+            res1 = grid.sum()
+
+    print("\n".join("".join("\u2588" if x else " " for x in y) for y in grid))
+
+    return res1, "^plot^"
