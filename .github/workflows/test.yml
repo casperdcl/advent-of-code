@@ -42,4 +42,4 @@ jobs:
         activate-environment: aoc
         environment-file: environment.yml
         auto-activate-base: false
-    - run: pytest
+    - run: pytest -v -n=auto
