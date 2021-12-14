@@ -1,4 +1,3 @@
-import re
 from collections import Counter
 from functools import lru_cache, reduce
 from io import StringIO
@@ -23,20 +22,18 @@ def day1():
 def day2():
     """2D navigation."""
     directions = {"forward": 1, "up": -1j, "down": 1j}
-    with open("2.txt") as fd:
-        x = [int((d_val := i.split())[1]) * directions[d_val[0]] for i in fd]
+    x = [int((d_val := i.split())[1]) * directions[d_val[0]] for i in open("2.txt")]
     res1 = sum(x)
     res1 = int(res1.real * res1.imag)
 
     aim = 0j
     res2 = complex()
-    with open("2.txt") as fd:
-        for i in fd:
-            d, val = i.split()
-            if d in {"up", "down"}:
-                aim += {"up": -1j, "down": 1j}[d] * int(val)
-            else:
-                res2 += (directions[d] + aim) * int(val)
+    for i in open("2.txt"):
+        d, val = i.split()
+        if d in {"up", "down"}:
+            aim += {"up": -1j, "down": 1j}[d] * int(val)
+        else:
+            res2 += (directions[d] + aim) * int(val)
     res2 = int(res2.real * res2.imag)
 
     return res1, res2
@@ -72,10 +69,10 @@ def day3():
 def day4():
     """Winning & losing Bingo."""
     draws, boards = open("4.txt").read().strip().split("\n\n", 1)
-    draws = [int(i) for i in draws.split(",")]
+    draws = np.fromstring(draws, dtype=np.int8, sep=",")
     boards = np.array(
         [[j.split() for j in i.split("\n")] for i in boards.split("\n\n")],
-        dtype=np.int32,
+        dtype=np.int8,
     )
     marked = np.zeros(boards.shape, dtype=bool)
 
@@ -97,11 +94,15 @@ def day4():
 
 def day5():
     """Counting line intersections."""
-    crds = np.array(
-        [list(map(int, re.split(r"[^\d]+", i.strip()))) for i in open("5.txt")],
-        dtype=np.int32,
+    crds = np.fromregex(
+        "5.txt",
+        r"(\d+),(\d+) -> (\d+),(\d+)",
+        [("x0", np.int16), ("y0", np.int16), ("x1", np.int16), ("y1", np.int16)],
     )
-    grid = np.zeros((crds[:, ::2].max() + 1, crds[:, 1::2].max() + 1), dtype=np.int32)
+    grid = np.zeros(
+        (max(map(max, crds[["x0", "x1"]])) + 1, max(map(max, crds[["y0", "y1"]])) + 1),
+        dtype=np.int16,
+    )
     for x0, y0, x1, y1 in crds:
         if x0 == x1 or y0 == y1:  # horiz/vert
             grid[min(y0, y1) : max(y0, y1) + 1, min(x0, x1) : max(x0, x1) + 1] += 1
@@ -377,7 +378,7 @@ def day12():
 
 def day13():
     """Folding paper."""
-    xy, folds = open("13.txt").read().strip().split("\n\n")
+    xy, folds = open("13.txt").read().strip().split("\n\n", 1)
     xy = np.loadtxt(StringIO(xy), delimiter=",", dtype=np.int16)
     folds = np.fromregex(
         StringIO(folds), r"fold along ([xy])=(\d+)", [("ax", "U1"), ("i", np.int16)]
@@ -403,7 +404,7 @@ def day13():
 
 def day14():
     """Depth First Counter."""
-    tmp, pairs = open("14.txt").read().strip().split("\n\n")
+    tmp, pairs = open("14.txt").read().strip().split("\n\n", 1)
     pairs = dict(i.split(" -> ") for i in pairs.split("\n"))
 
     @lru_cache(maxsize=5000)
