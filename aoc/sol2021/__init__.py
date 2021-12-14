@@ -408,18 +408,18 @@ def day14():
     pairs = dict(i.split(" -> ") for i in pairs.split("\n"))
 
     @lru_cache(maxsize=5000)
-    def recurse(pair, step, maxstep):
+    def recurse(l, r, step, maxstep):
         if step == maxstep:
             return Counter()
         return (
-            Counter(new := pairs[pair])
-            + recurse(f"{pair[0]}{new}", step + 1, maxstep)
-            + recurse(f"{new}{pair[1]}", step + 1, maxstep)
+            Counter(new := pairs[l + r])
+            + recurse(l, new, step + 1, maxstep)
+            + recurse(new, r, step + 1, maxstep)
         )
 
     c1, c2 = Counter(tmp), Counter(tmp)
-    for pair in (tmp[i : i + 2] for i in range(len(tmp) - 1)):
-        c1 += recurse(pair, 0, 10)
-        c2 += recurse(pair, 0, 40)
+    for i in range(len(tmp) - 1):
+        c1 += recurse(tmp[i], tmp[i + 1], 0, 10)
+        c2 += recurse(tmp[i], tmp[i + 1], 0, 40)
 
     return max(c1.values()) - min(c1.values()), max(c2.values()) - min(c2.values())
