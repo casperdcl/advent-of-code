@@ -5,6 +5,7 @@ from itertools import count, permutations, product
 
 import networkx as nx
 import numpy as np
+from tqdm import tqdm
 
 from aoc.sol2020 import conv
 
@@ -423,3 +424,38 @@ def day14():
         c2 += recurse(tmp[i], tmp[i + 1], 0, 40)
 
     return max(c1.values()) - min(c1.values()), max(c2.values()) - min(c2.values())
+
+
+def day15():
+    """Shortest path."""
+    w = np.asarray(
+        [list(map(int, i)) for i in open("15.txt").read().strip().split()],
+        dtype=np.uint8,
+    )
+    shp = w.shape
+    for ax in range(2):
+        w = np.concatenate([(w + i) % 9 + 1 for i in range(-1, 4)], axis=ax)
+    g = nx.DiGraph()
+
+    def add_edges(w, progress=False):
+        neighbours = [
+            (b, a) for b, a in product(range(-1, 2), repeat=2) if abs(a) != abs(b)
+        ]
+        for j, i in tqdm(
+            product(range(w.shape[0]), range(w.shape[1])),
+            unit="node",
+            disable=not progress,
+            leave=False,
+            total=np.prod(w.shape),
+            unit_scale=True,
+        ):
+            for b, a in neighbours:
+                if 0 <= j + b < w.shape[0] and 0 <= i + a < w.shape[1]:
+                    g.add_edge((j, i), (j + b, i + a), w=w[j + b][i + a])
+
+    add_edges(w[: shp[0], : shp[1]])
+    res1 = nx.shortest_path_length(g, (0, 0), tuple(i - 1 for i in shp), weight="w")
+    add_edges(w, True)
+    res2 = nx.shortest_path_length(g, (0, 0), tuple(i - 1 for i in w.shape), weight="w")
+
+    return res1, res2

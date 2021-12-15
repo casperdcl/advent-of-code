@@ -56,6 +56,7 @@ output = {
 ████ █  █ █  █ ████ ███  █    █  █ █  █
 13 Folding paper. (653, '^plot (102)^') 0.01s
 14 Depth First Counter. (3143, 4110215602456) 0.03s
+15 Shortest path. (487, 2821) 5.01s
 """,
 }
 
