@@ -1,3 +1,5 @@
+import operator
+import re
 from collections import Counter
 from functools import lru_cache, reduce
 from io import StringIO
@@ -459,3 +461,46 @@ def day15():
     res2 = nx.shortest_path_length(g, (0, 0), tuple(i - 1 for i in w.shape), weight="w")
 
     return res1, res2
+
+
+def day16():
+    """Parsing machine code."""
+    x = "".join(f"{bin(int(i, 16))[2:]:>04}" for i in open("16.txt").read().strip())
+    op = {0: "sm", 1: "pd", 2: "mn", 3: "mx", 5: "gt", 6: "lt", 7: "eq"}
+    ops = {
+        "sm": lambda *i: sum(i),
+        "pd": lambda *i: np.prod(i),
+        "mn": lambda *i: min(i),
+        "mx": lambda *i: max(i),
+        "gt": operator.gt,
+        "lt": operator.lt,
+        "eq": operator.eq,
+    }
+    res1, res2 = [], []
+
+    def parse(x: str, i: int, X: int, once: bool = False):
+        while X - i >= 8 or not all(j == "0" for j in x[i:X]):
+            ver = int(x[i : (i := i + 3)], 2)
+            res1.append(ver)
+            typ = int(x[i : (i := i + 3)], 2)
+            if typ == 4:  # literal
+                delta = (x[i::5].index("0") + 1) * 5
+                res2.append(
+                    "0b" + "".join(re.findall(".(.{4})", x[i : (i := i + delta)]))
+                )
+            else:  # operator
+                res2.append(f"{op[typ]}(")
+                i += 1
+                if x[i - 1] == "0":
+                    sub_len = int(x[i : (i := i + 15)], 2)
+                    parse(x, i, (i := i + sub_len))
+                else:
+                    for _ in range(int(x[i : (i := i + 11)], 2)):
+                        i = parse(x, i, X, once=True)
+                res2.append(")")
+            if once:
+                return i
+        return X
+
+    parse(x, 0, len(x))
+    return sum(res1), eval(",".join(res2).replace("(,", "("), ops)
