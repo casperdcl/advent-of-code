@@ -58,6 +58,7 @@ output = {
 14 Depth First Counter. (3143, 4110215602456) 0.03s
 15 Shortest path. (487, 2821) 5.01s
 16 Parsing machine code. (991, 1264485568252) 0.00s
+17 Discrete projectile targets. (19503, 5200) 4.02s
 """,
 }
 

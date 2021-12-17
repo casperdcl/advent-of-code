@@ -7,7 +7,7 @@ from itertools import count, permutations, product
 
 import networkx as nx
 import numpy as np
-from tqdm import tqdm
+from tqdm import tqdm, trange
 
 from aoc.sol2020 import conv
 
@@ -30,7 +30,7 @@ def day2():
     res1 = int(res1.real * res1.imag)
 
     aim = 0j
-    res2 = complex()
+    res2 = 0j
     for i in open("2.txt"):
         d, val = i.split()
         if d in {"up", "down"}:
@@ -504,3 +504,34 @@ def day16():
 
     parse(x, 0, len(x))
     return sum(res1), eval(",".join(res2).replace("(,", "("), ops)
+
+
+def crange(start: complex, stop: complex, step: complex = 1):
+    while start != stop:
+        yield start
+        start += step
+
+
+def day17():
+    """Discrete projectile targets."""
+    x0, x1, y0, y1 = np.fromregex(
+        open("17.txt"),
+        r"target area: x=([-\d]+)..([-\d]+), y=([-\d]+)..([-\d]+)",
+        [("x0", np.int16), ("x1", np.int16), ("y0", np.int16), ("y1", np.int16)],
+    )[0]
+
+    res1, res2 = None, 0
+    for u in trange(-y0, y0 - 1, -1, leave=False):
+        for v in crange(1 + 1j * u, 1 + x1 + 1j * u):
+            p, height = 0j, 0
+            while p.real <= x1 and y0 <= p.imag:
+                p += v
+                height = max(height, int(p.imag))
+                v -= (1 if v.real > 0 else 0) + 1j
+                if x0 <= p.real <= x1 and y0 <= p.imag <= y1:
+                    if res1 is None:
+                        res1 = height
+                    res2 += 1
+                    break
+
+    return res1, res2
