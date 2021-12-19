@@ -59,6 +59,7 @@ output = {
 15 Shortest path. (487, 2821) 5.01s
 16 Parsing machine code. (991, 1264485568252) 0.00s
 17 Discrete projectile targets. (19503, 5200) 4.02s
+18 Binary Tree custom addition. (4323, 4749) 4.62s
 """,
 }
 
