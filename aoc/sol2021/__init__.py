@@ -650,3 +650,63 @@ def day18():
         abs(m + n)
         for m, n in tqdm(product(x, repeat=2), total=len(x) ** 2, leave=False)
     )
+
+
+def union(sets):
+    """Union of all given sets"""
+    return reduce(lambda x, y: x | y, sets)
+
+
+def day19():
+    """3D transformed volume overlaps."""
+    scanners = [
+        np.asarray(
+            [list(map(int, beacon.split(","))) for beacon in i.split("\n")[1:]],
+            dtype=np.int32,
+        )
+        for i in open("19.txt").read().strip().split("\n\n")
+    ]
+
+    def roll(vecs):
+        return vecs[:, [0, 2, 1]] * np.array([[1, 1, -1]], dtype=vecs.dtype)
+
+    def turn(vecs):
+        return vecs[:, [1, 0, 2]] * np.array([[-1, 1, 1]], dtype=vecs.dtype)
+
+    def rots(vecs):
+        for _ in range(2):
+            for _ in range(3):
+                yield (vecs := roll(vecs))
+                for _ in range(3):
+                    yield (vecs := turn(vecs))
+            vecs = roll(turn(roll(vecs)))
+
+    def is_overlap(v, w):
+        return len(set(map(tuple, v)) & set(map(tuple, w))) >= 12
+
+    checked = set()
+    locked = {0: scanners[0]}
+    locs = np.zeros((len(scanners), 3), dtype=scanners[0].dtype)
+    with tqdm(total=len(scanners) - 1, unit="scanner", leave=False) as t:
+        while len(locked) < len(scanners):
+            for s in tqdm(set(range(len(scanners))) - locked.keys(), leave=False):
+                try:
+                    for l in locked:
+                        if (min(s, l), max(s, l)) not in checked:
+                            for other in rots(scanners[s]):
+                                for _other, _locked in product(other, locked[l][:-11]):
+                                    if is_overlap(
+                                        locked[l], (_o := (other + [_locked - _other]))
+                                    ):
+                                        locked[s] = _o
+                                        locs[s] = _locked - _other
+                                        t.update()
+                                        raise KeyError
+                except KeyError:
+                    pass
+                checked.add((min(s, l), max(s, l)))
+
+    res1 = len(union(set(map(tuple, i)) for i in locked.values()))
+    res2 = max(abs(i - j).sum() for i, j in product(locs, repeat=2))
+
+    return res1, res2
