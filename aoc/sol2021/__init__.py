@@ -653,11 +653,6 @@ def day18():
     )
 
 
-def union(sets):
-    """Union of all given sets"""
-    return reduce(lambda x, y: x | y, sets)
-
-
 def day19():
     """3D transformed volume overlaps."""
     scanners = [
@@ -707,7 +702,7 @@ def day19():
                     pass
                 checked.add((min(s, l), max(s, l)))
 
-    res1 = len(union(set(map(tuple, i)) for i in locked.values()))
+    res1 = len(reduce(set.union, (set(map(tuple, i)) for i in locked.values())))
     res2 = max(abs(i - j).sum() for i, j in product(locs, repeat=2))
 
     return res1, res2

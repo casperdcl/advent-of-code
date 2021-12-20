@@ -113,16 +113,11 @@ def day5():
     return res1, res2
 
 
-def intersection(sets):
-    """Intersection of all given sets"""
-    return reduce(lambda x, y: x & y, sets)
-
-
 def day6():
     """Common choices."""
     x = open("6.txt").read().strip().split("\n\n")
     res1 = sum(len({i for row in batch.split() for i in row}) for batch in x)
-    res2 = sum(len(intersection(set(row) for row in batch.split())) for batch in x)
+    res2 = sum(len(reduce(set.intersection, map(set, batch.split()))) for batch in x)
     return res1, res2
 
 
