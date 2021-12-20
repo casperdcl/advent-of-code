@@ -551,16 +551,19 @@ def day18():
         def __repr__(self):
             return f"[{self.left},{self.right}]" if self.val is None else repr(self.val)
 
-        def build(self, pairs, dtype=int):
+        @classmethod
+        def fromlist(cls, pairs, dtype=int):
+            n = cls()
             if isinstance(pairs, dtype):
-                self.val = pairs
+                n.val = pairs
             else:
-                self.left = BSTNode(parent=self).build(pairs[0], dtype)
-                self.right = BSTNode(parent=self).build(pairs[1], dtype)
-            return self
+                n.left = cls.fromlist(pairs[0], dtype)
+                n.right = cls.fromlist(pairs[1], dtype)
+                n.left.parent = n.right.parent = n
+            return n
 
         def copy(self, parent=None):
-            # return BSTNode().build(eval(repr(self)))
+            # return BSTNode.fromlist(eval(repr(self)))
             res = BSTNode(val=self.val, parent=parent)
             for n in ("left", "right"):
                 if o := getattr(self, n):
@@ -626,16 +629,14 @@ def day18():
                     n.val = None
                     return self
 
-        def explode_split(self):
-            while True:
-                while self.explode():
-                    pass
-                if self.split() is None:
-                    break
-            return self
-
         def __add__(self, other):
-            return BSTNode(left=self.copy(), right=other.copy()).explode_split()
+            n = BSTNode(left=self.copy(), right=other.copy())
+            while True:
+                while n.explode():
+                    pass
+                if n.split() is None:
+                    break
+            return n
 
         def __abs__(self):
             return sum(
@@ -644,7 +645,7 @@ def day18():
                 if n is not None
             )
 
-    x = [BSTNode().build(eval(i)) for i in open("18.txt")]
+    x = [BSTNode.fromlist(eval(i)) for i in open("18.txt")]
 
     return abs(sum(x[1:], x[0])), max(
         abs(m + n)
