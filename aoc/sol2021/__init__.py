@@ -710,3 +710,24 @@ def day19():
     res2 = max(abs(i - j).sum() for i, j in product(locs, repeat=2))
 
     return res1, res2
+
+
+def day20():
+    """Game of Life infinite spawn."""
+    alg, img = open("20.txt").read().strip().split("\n\n", 1)
+
+    alg = np.asarray([i == "#" for i in alg], dtype=np.int16)
+    assert alg.shape == (512,)
+    img = np.asarray(
+        [[i == "#" for i in row] for row in img.split("\n")], dtype=alg.dtype
+    )
+
+    knl = 2 ** np.arange(3 * 3, dtype=alg.dtype).reshape((3, 3))
+    steps = 50
+    img = np.pad(img, 3 * steps)
+    for step in range(steps):
+        img = alg[conv(img, knl, mode="wrap")]
+        if step == 1:
+            res1 = img.sum()
+
+    return res1, img.sum()

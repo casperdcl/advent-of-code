@@ -61,6 +61,7 @@ output = {
 17 Discrete projectile targets. (19503, 5200) 4.02s
 18 Binary Tree custom addition. (4323, 4749) 4.62s
 19 3D transformed volume overlaps. (390, 13327) 811.29s
+20 Game of Life infinite spawn. (5339, 18395) 0.17s
 """,
 }
 
