@@ -67,7 +67,7 @@ output = {
 
 @pytest.mark.parametrize("day", range(1, 26))
 @pytest.mark.parametrize("year", output)
-def test_sol(year, day):
+def test_sol(year, day, request):
     mod = pytest.importorskip(f"aoc.sol{year}")
     chdir(Path(mod.__file__).parent.resolve())
     try:
@@ -77,7 +77,9 @@ def test_sol(year, day):
     doc = re.sub(r"([^\w\s])", r"\\\1", dedent(func.__doc__).strip()).replace(
         "\n", ".*?"
     )
-    expected = re.search(
-        r"^\s*" f"{day} {doc}" r" (.*?) [.\d]+s$", output[year], flags=re.M | re.S
-    ).group(1)
+    expected, t = re.search(
+        r"^\s*" f"{day} {doc}" r" (.*?) ([.\d]+)s$", output[year], flags=re.M | re.S
+    ).groups()
+    if float(t) > request.config.getoption("timeout"):
+        pytest.skip("timeout")
     assert f"{func()}" == expected
