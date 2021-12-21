@@ -59,7 +59,7 @@ output = {
 15 Shortest path. (487, 2821) 5.01s
 16 Parsing machine code. (991, 1264485568252) 0.00s
 17 Discrete projectile targets. (19503, 5200) 4.02s
-18 Binary Tree custom addition. (4323, 4749) 4.62s
+18 Binary Tree custom addition. (4323, 4749) 2.09s
 19 3D transformed volume overlaps. (390, 13327) 811.29s
 20 Game of Life infinite spawn. (5339, 18395) 0.17s
 21 Counting possible outcomes. (752247, 221109915584112) 0.31s

@@ -1,6 +1,7 @@
 import operator
 import re
 from collections import Counter
+from dataclasses import dataclass
 from functools import lru_cache, reduce
 from io import StringIO
 from itertools import count, permutations, product
@@ -540,13 +541,13 @@ def day17():
 def day18():
     """Binary Tree custom addition."""
 
+    @dataclass(slots=True)
     class BSTNode:
-        def __init__(self, val=None, left=None, right=None, parent=None):
-            assert val is None or (left is None and right is None)
-            self.val, self.left, self.right, self.parent = val, left, right, parent
-            for n in (left, right):
-                if n:
-                    n.parent = self
+        val: int = None
+        parent: "BSTNode" = None
+        side: int = 0
+        left: "BSTNode" = None
+        right: "BSTNode" = None
 
         def __repr__(self):
             return f"[{self.left},{self.right}]" if self.val is None else repr(self.val)
@@ -560,14 +561,16 @@ def day18():
                 n.left = cls.fromlist(pairs[0], dtype)
                 n.right = cls.fromlist(pairs[1], dtype)
                 n.left.parent = n.right.parent = n
+                n.left.side, n.right.side = -1, 1
             return n
 
         def copy(self, parent=None):
             # return BSTNode.fromlist(eval(repr(self)))
-            res = BSTNode(val=self.val, parent=parent)
-            for n in ("left", "right"):
-                if o := getattr(self, n):
-                    setattr(res, n, o.copy(res))
+            res = BSTNode(val=self.val, parent=parent, side=self.side)
+            if self.left:
+                res.left = self.left.copy(res)
+            if self.right:
+                res.right = self.right.copy(res)
             return res
 
         def first(self):
@@ -584,27 +587,19 @@ def day18():
             if self.right:
                 yield from self.right.leaves()
 
-        def is_left_child(self):
-            return getattr(self.parent, "left", None) is self
-
-        def is_right_child(self):
-            return getattr(self.parent, "right", None) is self
-
         def next_leaf(self):
             n = self
-            while n.is_right_child():
+            while n.side > 0:
                 n = n.parent
-            if n.is_left_child():
+            if n.side < 0:
                 return n.parent.right.first()
-            return None
 
         def prev_leaf(self):
             n = self
-            while n.is_left_child():
+            while n.side < 0:
                 n = n.parent
-            if n.is_right_child():
+            if n.side > 0:
                 return n.parent.left.last()
-            return None
 
         def num_parents(self):
             return 1 + self.parent.num_parents() if self.parent else 0
@@ -615,7 +610,7 @@ def day18():
                     o = n.next_leaf()
                     if m := n.prev_leaf():
                         m.val += n.val
-                    if p := o.next_leaf():
+                    if o and (p := o.next_leaf()):
                         p.val += o.val
                     n.parent.val, n.parent.left, n.parent.right = 0, None, None
                     return self
@@ -624,13 +619,15 @@ def day18():
             for n in self.leaves():
                 if n.val >= 10:
                     res, rem = divmod(n.val, 2)
-                    n.left = BSTNode(parent=n, val=res)
-                    n.right = BSTNode(parent=n, val=res + rem)
+                    n.left = BSTNode(parent=n, val=res, side=-1)
+                    n.right = BSTNode(parent=n, val=res + rem, side=1)
                     n.val = None
                     return self
 
         def __add__(self, other):
             n = BSTNode(left=self.copy(), right=other.copy())
+            n.left.parent = n.right.parent = n
+            n.left.side, n.right.side = -1, 1
             while True:
                 while n.explode():
                     pass
