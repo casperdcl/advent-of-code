@@ -727,3 +727,46 @@ def day20():
             res1 = img.sum()
 
     return res1, img.sum()
+
+
+def day21():
+    """Counting possible outcomes."""
+    start = [int(i.strip().split(": ", 1)[1]) for i in open("21.txt")]
+
+    pos = start.copy()
+    score = [0, 0]
+    player = 0
+    for i in count(0):
+        steps = (i * 3 + 2) * 3
+        new = pos[player] + steps % 10
+        pos[player] = (new % 10) if new > 10 else new
+        score[player] += pos[player]
+        if score[player] >= 1000:
+            rolls = (i + 1) * 3
+            res1 = score[(player + 1) % 2] * rolls
+            break
+        player = (player + 1) % 2
+
+    player = 0
+    step_universes = {3: 1, 4: 3, 5: 6, 6: 7, 7: 6, 8: 3, 9: 1}
+    # p1_pos(0..9), p1_score(0..30), p2_pos(0..9), p2_score(0..30)
+    universes = np.zeros((10, 21 + 10) * 2, dtype=np.int64)
+    universes[start[0] - 1, 0, start[1] - 1, 0] = 1
+
+    new_universes = np.zeros_like(universes)
+    p1, s1, p2, s2 = np.meshgrid(range(10), range(21), range(10), range(21))
+    while universes[:, :21, :, :21].any():
+        new_universes[:] = 0
+        for steps, unis in step_universes.items():
+            new = ([p1, p2][player] + 1) + steps % 10
+            pos = np.where(new > 10, new % 10, new)
+            u = universes[p1, s1, p2, s2] * unis
+            if player:  # p2
+                new_universes[p1, s1, pos - 1, s2 + pos] += u
+            else:  # p1
+                new_universes[pos - 1, s1 + pos, p2, s2] += u
+        universes[:, :21, :, :21] = 0
+        universes += new_universes
+        player = (player + 1) % 2
+
+    return res1, max(universes[:, 21:].sum(), universes[..., 21:].sum())
