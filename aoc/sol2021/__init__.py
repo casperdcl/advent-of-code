@@ -4,7 +4,7 @@ from collections import Counter
 from dataclasses import dataclass
 from functools import lru_cache, reduce
 from io import StringIO
-from itertools import count, permutations, product
+from itertools import count, cycle, permutations, product
 
 import networkx as nx
 import numpy as np
@@ -732,17 +732,14 @@ def day21():
 
     pos = start.copy()
     score = [0, 0]
-    player = 0
-    for i in count(0):
-        steps = (i * 3 + 2) * 3
-        new = pos[player] + steps % 10
-        pos[player] = (new % 10) if new > 10 else new
+    for player, rolls, steps in zip(
+        cycle([0, 1]), count(3, 3), cycle(((i * 3 + 2) * 3) % 10 for i in range(100))
+    ):
+        pos[player] = (pos[player] + steps - 1) % 10 + 1
         score[player] += pos[player]
         if score[player] >= 1000:
-            rolls = (i + 1) * 3
             res1 = score[(player + 1) % 2] * rolls
             break
-        player = (player + 1) % 2
 
     player = 0
     step_universes = {3: 1, 4: 3, 5: 6, 6: 7, 7: 6, 8: 3, 9: 1}
@@ -752,16 +749,16 @@ def day21():
 
     new_universes = np.zeros_like(universes)
     p1, s1, p2, s2 = np.meshgrid(range(10), range(21), range(10), range(21))
+    pos_maps = {steps: [(p + steps) % 10 for p in (p1, p2)] for steps in step_universes}
     while universes[:, :21, :, :21].any():
         new_universes[:] = 0
         for steps, unis in step_universes.items():
-            new = ([p1, p2][player] + 1) + steps % 10
-            pos = np.where(new > 10, new % 10, new)
+            pos = pos_maps[steps][player]
             u = universes[p1, s1, p2, s2] * unis
             if player:  # p2
-                new_universes[p1, s1, pos - 1, s2 + pos] += u
+                new_universes[p1, s1, pos, s2 + pos + 1] += u
             else:  # p1
-                new_universes[pos - 1, s1 + pos, p2, s2] += u
+                new_universes[pos, s1 + pos + 1, p2, s2] += u
         universes[:, :21, :, :21] = 0
         universes += new_universes
         player = (player + 1) % 2
