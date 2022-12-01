@@ -2,7 +2,7 @@
 
 [![Tests](https://github.com/casperdcl/advent-of-code/workflows/Test/badge.svg)](https://github.com/casperdcl/advent-of-code/actions)
 
-Solutions to problems from <https://adventofcode.com/2020> and <https://adventofcode.com/2021>.
+Solutions to problems from <https://adventofcode.com/2020>, <https://adventofcode.com/2021>, and <https://adventofcode.com/2022>.
 
 ```sh
 conda env create

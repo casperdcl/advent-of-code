@@ -3,7 +3,7 @@
   aoc [options] [<day>...]
 
 Options:
-  -y YEAR, --year YEAR  : [default: 2021:int]
+  -y YEAR, --year YEAR  : [default: 2022:int]
 
 Arguments:
   <day>  : [default: 0:int], use <1 for all

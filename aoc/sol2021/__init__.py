@@ -54,7 +54,7 @@ def day3():
     most = np.array([most_common(i) for i in x.T])
 
     def binlist2int(arr):
-        return sum(2 ** i * v for i, v in enumerate(arr[::-1]))
+        return sum(2**i * v for i, v in enumerate(arr[::-1]))
 
     res1 = binlist2int(most) * binlist2int(~most)
 
@@ -196,7 +196,7 @@ def day8(brute=False):
                     out_trans = (sort_str(i.translate(tab)) for i in out)
                     res2 += [maps[i] for i in out_trans]
                     break
-        res2 = sum(10 ** i * v for i, v in enumerate(res2[::-1]))
+        res2 = sum(10**i * v for i, v in enumerate(res2[::-1]))
 
         return res1, res2
 
@@ -256,7 +256,7 @@ def day8(brute=False):
         assert all(len(i) == 1 for i in maps.values())
         maps = {k: v.pop() for k, v in maps.items()}
         res2 += [maps[disp] for disp in out]
-    res2 = sum(10 ** i * v for i, v in enumerate(res2[::-1]))
+    res2 = sum(10**i * v for i, v in enumerate(res2[::-1]))
 
     return res1, res2
 
