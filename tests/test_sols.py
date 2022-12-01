@@ -64,6 +64,8 @@ output = {
 20 Game of Life infinite spawn. (5339, 18395) 0.17s
 21 Counting possible outcomes. (752247, 221109915584112) 0.21s
 """,
+    2022: r"""1 Reducing & sorting lists. (69626, 206780) 0.00s
+""",
 }
 
 
