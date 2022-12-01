@@ -32,14 +32,16 @@ jobs:
     - run: pre-commit run -a --show-diff-on-failure
   test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash -l {0}
     steps:
     - uses: actions/checkout@v3
+    - uses: actions/cache@v3
+      with:
+        path: ~/conda_pkgs_dir
+        key: conda|${{ hashFiles('environment.yml') }}
     - uses: conda-incubator/setup-miniconda@v2
       with:
         activate-environment: aoc
         environment-file: environment.yml
         auto-activate-base: false
     - run: pytest -v -n=auto
+      shell: bash -el {0}
