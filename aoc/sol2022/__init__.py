@@ -50,3 +50,14 @@ def day3():
         c = set(i).intersection(j).intersection(k).pop()
         res2 += ord(c) - (ord("a") - 1 if c.lower() == c else ord("A") - 27)
     return res1, res2
+
+
+def day4():
+    """Overlapping ranges."""
+    abxy = np.fromregex(
+        open("4.txt"), r"(\d+)-(\d+),(\d+)-(\d+)", [(c, np.int16) for c in "abxy"]
+    )
+    a, b, x, y = (abxy[c] for c in "abxy")
+    res1 = sum(((a <= x) & (b >= y)) | ((x <= a) & (y >= b)))
+    res2 = sum(((b >= x) & (a <= x)) | ((y >= a) & (x <= a)))
+    return res1, res2
