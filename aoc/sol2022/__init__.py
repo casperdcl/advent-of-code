@@ -1,3 +1,4 @@
+from collections import deque
 from heapq import nlargest
 
 import numpy as np
@@ -60,4 +61,24 @@ def day4():
     a, b, x, y = (abxy[c] for c in "abxy")
     res1 = sum(((a <= x) & (y <= b)) | ((x <= a) & (b <= y)))  # subset
     res2 = sum((x <= b) & (a <= y))  # overlap
+    return res1, res2
+
+
+def day5():
+    """Stack manipulation."""
+    yx, moves = open("5.txt").read().strip().split("\n\n")
+    moves = [tuple(map(int, m.split()[1::2])) for m in moves.split("\n")]
+    yx, N = yx.rsplit("\n", 1)
+    N = int(N[-1][-1])
+    yx = np.array([list(y[1::4].ljust(N)) for y in yx.split("\n")]).T[:, ::-1]
+
+    stacks = [deque(i for i in stack if i != " ") for stack in yx]
+    for n, src, dst in moves:
+        stacks[dst - 1].extend(stacks[src - 1].pop() for _ in range(n))
+    res1 = "".join(i.pop() for i in stacks)
+
+    stacks = [deque(i for i in stack if i != " ") for stack in yx]
+    for n, src, dst in moves:
+        stacks[dst - 1].extend([stacks[src - 1].pop() for _ in range(n)][::-1])
+    res2 = "".join(i.pop() for i in stacks)
     return res1, res2
