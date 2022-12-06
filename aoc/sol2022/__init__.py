@@ -58,6 +58,6 @@ def day4():
         open("4.txt"), r"(\d+)-(\d+),(\d+)-(\d+)", [(c, np.int16) for c in "abxy"]
     )
     a, b, x, y = (abxy[c] for c in "abxy")
-    res1 = sum(((a <= x) & (b >= y)) | ((x <= a) & (y >= b)))
-    res2 = sum(((b >= x) & (a <= x)) | ((y >= a) & (x <= a)))
+    res1 = sum(((a <= x) & (y <= b)) | ((x <= a) & (b <= y)))  # subset
+    res2 = sum((x <= b) & (a <= y))  # overlap
     return res1, res2
