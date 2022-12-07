@@ -82,3 +82,22 @@ def day5():
         stacks[dst - 1].extend([stacks[src - 1].pop() for _ in range(n)][::-1])
     res2 = "".join(i.pop() for i in stacks)
     return res1, res2
+
+
+def day6():
+    """Unique sequences."""
+    x = open("6.txt").read().strip()
+    res1 = None
+    buf1 = deque([], maxlen=4)
+    buf2 = deque([], maxlen=14)
+    for i, c in enumerate(x):
+        if not res1:
+            buf1.append(c)
+            # TODO: use `set.{add,remove}` O(1) instead of re-creating sets O(N)
+            if len(set(buf1)) == 4:
+                res1 = i + 1
+        buf2.append(c)
+        if len(set(buf2)) == 14:
+            res2 = i + 1
+            break
+    return res1, res2

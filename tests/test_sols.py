@@ -69,6 +69,7 @@ output = {
 3 Set intersections. (8515, 2434) 0.00s
 4 Overlapping ranges. (433, 852) 0.00s
 5 Stack manipulation. ('GFTNRBZPF', 'VRQWPDSGP') 0.00s
+6 Unique sequences. (1804, 2508) 0.00s
 """,
 }
 
