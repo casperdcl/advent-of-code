@@ -1,4 +1,5 @@
 from collections import deque
+from functools import cache
 from heapq import nlargest
 
 import numpy as np
@@ -99,4 +100,55 @@ def day6():
         if len(set(buf2)) == buf2.maxlen:
             res2 = i + 1
             break
+    return res1, res2
+
+
+class MultiNode:
+    def __init__(self, name, value=0, parent=None):
+        self.name = name
+        self.value = value
+        self.children = set()
+        self.parent = parent
+        if parent is not None:
+            parent.children.add(self)
+
+    @cache  # assumes no further modifications to `self.children`
+    def __len__(self):
+        return sum(map(len, self.children)) + self.value
+
+    def __getitem__(self, name):
+        return next(filter(lambda i: i.name == name, self.children))
+
+    def __iter__(self):
+        yield self
+        for i in self.children:
+            if i.children:  # exclude leaves
+                yield from i
+
+    def add(self, *args, **kwargs):
+        return MultiNode(*args, parent=self, **kwargs)
+
+
+def day7():
+    """Directory sizes."""
+    tty = open("7.txt").read().strip().split("\n")
+    root = cwd = MultiNode("/")
+    for l in tty:
+        if l == "$ ls":
+            pass
+        elif l == "$ cd ..":
+            cwd = cwd.parent
+        elif l == "$ cd /":
+            cwd = root
+        elif l.startswith("$ cd "):
+            cwd = cwd[l[5:]]  # except: cwd = cwd.add(l[5:])
+        elif l.startswith("dir "):
+            cwd.add(l[4:])
+        else:  # "(?P<size>\d+) (?P<filename>.*)"
+            size, filename = l.split(" ", 1)
+            cwd.add(filename, value=int(size))
+
+    res1 = sum(len(cwd) for cwd in root if len(cwd) <= 100_000)
+    diff = 30_000_000 - (70_000_000 - len(root))
+    res2 = min(len(cwd) for cwd in root if len(cwd) >= diff)
     return res1, res2

@@ -70,6 +70,7 @@ output = {
 4 Overlapping ranges. (433, 852) 0.00s
 5 Stack manipulation. ('GFTNRBZPF', 'VRQWPDSGP') 0.00s
 6 Unique sequences. (1804, 2508) 0.00s
+7 Directory sizes. (1648397, 1815525) 0.00s
 """,
 }
 
