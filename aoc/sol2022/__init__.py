@@ -1,4 +1,4 @@
-from collections import Counter, deque
+from collections import deque
 from heapq import nlargest
 
 import numpy as np
@@ -84,31 +84,19 @@ def day5():
     return res1, res2
 
 
-class UniqDeque(deque):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.count = Counter(self)
-
-    def __lshift__(self, v):
-        """`self.append()` but returns `True` iff full & all contents are unique"""
-        if len(self) == self.maxlen:
-            self.count[self.popleft()] -= 1
-        self.count[v] += 1
-        self.append(v)
-        return len(self) == self.maxlen and self.count.most_common(1)[0][1] == 1
-
-
 def day6():
     """Unique sequences."""
     x = open("6.txt").read().strip()
     res1 = None
-    deq1 = UniqDeque([], maxlen=4)
-    deq2 = UniqDeque([], maxlen=14)
+    buf1 = deque([], maxlen=4)
+    buf2 = deque([], maxlen=14)
     for i, c in enumerate(x):
         if not res1:
-            if deq1 << c:
+            buf1.append(c)
+            if len(set(buf1)) == buf1.maxlen:
                 res1 = i + 1
-        if deq2 << c:
+        buf2.append(c)
+        if len(set(buf2)) == buf2.maxlen:
             res2 = i + 1
             break
     return res1, res2
