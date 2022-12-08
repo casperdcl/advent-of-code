@@ -71,6 +71,7 @@ output = {
 5 Stack manipulation. ('GFTNRBZPF', 'VRQWPDSGP') 0.00s
 6 Unique sequences. (1804, 2508) 0.00s
 7 Directory sizes. (1648397, 1815525) 0.00s
+8 Max block reduce. (1814, 330786) 0.04s
 """,
 }
 
