@@ -1,7 +1,7 @@
 from collections import deque
-from functools import cache, reduce
+from functools import cache
 from heapq import nlargest
-from itertools import product
+from itertools import pairwise
 
 import numpy as np
 
@@ -160,32 +160,26 @@ def day7():
 def day8():
     """Max block reduce."""
     grid = np.genfromtxt("8.txt", dtype=np.int8, delimiter=1)
-    n = np.zeros_like(grid) - 1  # north
-    s, w, e = n.copy(), n.copy(), n.copy()  # south, west, east
-    Y, X = grid.shape
-    for y in range(1, Y):
-        n[y, :] = np.max((n[y - 1, :], grid[y - 1, :]), axis=0)
-    for y in range(Y - 2, -1, -1):
-        s[y, :] = np.max((s[y + 1, :], grid[y + 1, :]), axis=0)
-    for x in range(1, X):
-        w[:, x] = np.max((w[:, x - 1], grid[:, x - 1]), axis=0)
-    for x in range(X - 2, -1, -1):
-        e[:, x] = np.max((e[:, x + 1], grid[:, x + 1]), axis=0)
-    res1 = reduce(lambda a, b: a | b, (grid > i for i in (n, e, w, s))).sum()
+    vis = np.zeros_like(grid, dtype=bool)
+    for _ in range(4):
+        vis_north = np.zeros_like(grid) - 1
+        for y0, y in pairwise(range(grid.shape[0])):
+            vis_north[y] = np.max((vis_north[y0], grid[y0]), axis=0)
+        vis |= grid > vis_north
+        grid, vis = map(np.rot90, (grid, vis))
+    res1 = vis.sum()
 
-    def visible(height, ys, xs):
-        res = 0
-        for yy, xx in product(ys, xs):
-            res += 1
-            if grid[yy, xx] >= height:
-                break
-        return res
-
-    res2 = -1
-    for y, x in product(range(Y), range(X)):
-        n = visible(grid[y, x], range(y - 1, -1, -1), [x])
-        s = visible(grid[y, x], range(y + 1, Y), [x])
-        w = visible(grid[y, x], [y], range(x - 1, -1, -1))
-        e = visible(grid[y, x], [y], range(x + 1, X))
-        res2 = max(res2, n * s * w * e)
+    vis = np.ones_like(grid, dtype=np.int32)
+    for _ in range(4):
+        for y in range(grid.shape[0]):
+            vis_north = np.zeros_like(grid[y])
+            done = np.zeros_like(grid[y], dtype=bool)
+            for yy in range(y - 1, -1, -1):
+                vis_north[~done] += 1
+                done[grid[yy] >= grid[y]] = True
+                if done.all():
+                    break
+            vis[y] *= vis_north
+        grid, vis = map(np.rot90, (grid, vis))
+    res2 = vis.max()
     return res1, res2
