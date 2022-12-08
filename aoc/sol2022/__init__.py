@@ -134,19 +134,21 @@ def day7():
     tty = open("7.txt").read().strip().split("\n")
     root = cwd = MultiNode("/")
     for l in tty:
-        if l == "$ ls":
-            pass
-        elif l == "$ cd ..":
-            cwd = cwd.parent
-        elif l == "$ cd /":
-            cwd = root
-        elif l.startswith("$ cd "):
-            cwd = cwd[l[5:]]  # except: cwd = cwd.add(l[5:])
-        elif l.startswith("dir "):
-            cwd.add(l[4:])
-        else:  # "(?P<size>\d+) (?P<filename>.*)"
-            size, filename = l.split(" ", 1)
-            cwd.add(filename, value=int(size))
+        match l.split():
+            case "$", "ls":
+                pass
+            case "$", "cd", "..":
+                cwd = cwd.parent
+            case "$", "cd", "/":
+                cwd = root
+            case "$", "cd", subdir:
+                cwd = cwd[subdir]  # except: cwd = cwd.add(subdir)
+            case "dir", subdir:
+                cwd.add(subdir)
+            case size, filename:
+                cwd.add(filename, value=int(size))
+            case _:
+                raise ValueError(l)
 
     res1 = sum(len(cwd) for cwd in root if len(cwd) <= 100_000)
     diff = 30_000_000 - (70_000_000 - len(root))
