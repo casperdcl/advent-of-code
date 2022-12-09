@@ -183,3 +183,22 @@ def day8():
         grid, vis = map(np.rot90, (grid, vis))
     res2 = vis.max()
     return res1, res2
+
+
+def day9():
+    """Chasing 2D points."""
+    knots = np.zeros((10, 2), dtype=np.int16)
+    visited = {1: {(0, 0)}, 9: {(0, 0)}}  # {knot_index: {(y, x), ...}}
+    for d, steps in np.loadtxt("9.txt", dtype=[("d", "U1"), ("steps", np.int8)]):
+        for _ in range(steps):
+            knots[0][0 if d in "UD" else 1] += 1 if d in "RD" else -1  # head
+            for head, tail in pairwise(range(len(knots))):
+                if (np.abs(diff := knots[head] - knots[tail]) > 1).any():
+                    # more than 1 space away
+                    knots[tail] += np.clip(diff, -1, 1)  # move 1 step closer
+                    if tail in visited:
+                        visited[tail].add(tuple(knots[tail]))
+                else:
+                    break
+    res1, res2 = map(len, visited.values())
+    return res1, res2

@@ -72,6 +72,7 @@ output = {
 6 Unique sequences. (1804, 2508) 0.00s
 7 Directory sizes. (1648397, 1815525) 0.00s
 8 Max block reduce. (1814, 330786) 0.04s
+9 Chasing 2D points. (6332, 2511) 0.48s
 """,
 }
 
