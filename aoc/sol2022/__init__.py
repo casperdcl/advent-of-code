@@ -73,13 +73,14 @@ def day5():
     N = int(N[-1][-1])
     yx = np.array([list(y[1::4].ljust(N)) for y in yx.split("\n")]).T[:, ::-1]
 
-    def solve(step=1):
-        stacks = [None] + [deque(i for i in stack if i != " ") for stack in yx]
+    def solve(step):
+        stacks = [None] + [[i for i in stack if i != " "] for stack in yx]
         for n, src, dst in moves:
-            stacks[dst].extend([stacks[src].pop() for _ in range(n)][::step])
-        return "".join(i.pop() for i in stacks[1:])
+            stacks[dst].extend(stacks[src][-n:][::step])
+            stacks[src] = stacks[src][:-n]
+        return "".join(i[-1] for i in stacks[1:])
 
-    return solve(1), solve(-1)
+    return solve(-1), solve(1)
 
 
 def day6():
