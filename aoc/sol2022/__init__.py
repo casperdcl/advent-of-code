@@ -1,3 +1,4 @@
+import string
 from collections import deque
 from functools import cache
 from heapq import nlargest
@@ -43,15 +44,13 @@ def day2():
 def day3():
     """Set intersections."""
     x = open("3.txt").read().strip().split()
+    priorities = {c: i for i, c in enumerate(string.ascii_letters, 1)}
     res1 = 0
     for i in x:
-        N = len(i)
-        c = set(i[: N // 2]).intersection(i[N // 2 :]).pop()
-        res1 += ord(c) - (ord("a") - 1 if c.lower() == c else ord("A") - 27)
+        res1 += priorities[set(i[: (half := len(i) // 2)]).intersection(i[half:]).pop()]
     res2, x2 = 0, iter(x)
     for i, j, k in zip(x2, x2, x2):  # zip(x[::3], x[1::3], x[2::3])
-        c = set(i).intersection(j).intersection(k).pop()
-        res2 += ord(c) - (ord("a") - 1 if c.lower() == c else ord("A") - 27)
+        res2 += priorities[set(i).intersection(j, k).pop()]
     return res1, res2
 
 
