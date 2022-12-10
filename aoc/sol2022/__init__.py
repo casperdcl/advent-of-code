@@ -88,19 +88,15 @@ def day5():
 def day6():
     """Unique sequences."""
     x = open("6.txt").read().strip()
-    res1 = None
-    buf1 = deque([], maxlen=4)
-    buf2 = deque([], maxlen=14)
-    for i, c in enumerate(x):
-        if not res1:
-            buf1.append(c)
-            if len(set(buf1)) == buf1.maxlen:
-                res1 = i + 1
-        buf2.append(c)
-        if len(set(buf2)) == buf2.maxlen:
-            res2 = i + 1
-            break
-    return res1, res2
+    res = []
+    for maxlen in (4, 14):
+        buf = deque([], maxlen=maxlen)
+        for i, c in enumerate(x):
+            buf.append(c)
+            if len(set(buf)) == maxlen:
+                res.append(i + 1)
+                break
+    return tuple(res)
 
 
 def day7():
