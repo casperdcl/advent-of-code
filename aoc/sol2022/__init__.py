@@ -45,12 +45,15 @@ def day3():
     """Set intersections."""
     x = open("3.txt").read().strip().split()
     priorities = {c: i for i, c in enumerate(string.ascii_letters, 1)}
-    res1 = 0
-    for i in x:
-        res1 += priorities[set(i[: (half := len(i) // 2)]).intersection(i[half:]).pop()]
-    res2, x2 = 0, iter(x)
-    for i, j, k in zip(x2, x2, x2):  # zip(x[::3], x[1::3], x[2::3])
-        res2 += priorities[set(i).intersection(j, k).pop()]
+    res1 = sum(
+        priorities[set(i[: (half := len(i) // 2)]).intersection(i[half:]).pop()]
+        for i in x
+    )
+    x2 = iter(x)
+    res2 = sum(
+        priorities[set(i).intersection(j, k).pop()]
+        for i, j, k in zip(x2, x2, x2)  # zip(x[::3], x[1::3], x[2::3])
+    )
     return res1, res2
 
 
