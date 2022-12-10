@@ -65,7 +65,7 @@ output = {
 21 Counting possible outcomes. (752247, 221109915584112) 0.21s
 """,
     2022: r"""1 Reducing & sorting lists. (69626, 206780) 0.00s
-2 Rock, paper, scissors. (11449, 13187) 0.01s
+2 Rock, paper, scissors. (11449, 13187) 0.00s
 3 Set intersections. (8515, 2434) 0.00s
 4 Overlapping ranges. (433, 852) 0.00s
 5 Stack manipulation. ('GFTNRBZPF', 'VRQWPDSGP') 0.00s

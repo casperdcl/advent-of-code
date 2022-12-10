@@ -19,25 +19,14 @@ def day1():
 def day2():
     """Rock, paper, scissors."""
     games = np.loadtxt("2.txt", dtype="U1")
-    trans = {"A": 0, "B": 1, "C": 2, "X": 0, "Y": 1, "Z": 2}
+    base_score = {"A": 0, "B": 1, "C": 2, "X": 0, "Y": 1, "Z": 2}
+    draw_win_lose_score = 4, 7, 1
     res1, res2 = 0, 0
     for them, us in games:
-        them = trans[them]
-
-        us1 = trans[us]
-        res1 += us1 + 1
-        if us1 == them:  # draw
-            res1 += 3
-        elif (us1 - them) % 3 == 1:  # win
-            res1 += 6
-
-        us2 = {"X": (them - 1) % 3, "Y": them, "Z": (them + 1) % 3}[us]
-        res2 += us2 + 1
-        if us2 == them:  # draw
-            res2 += 3
-        elif (us2 - them) % 3 == 1:  # win
-            res2 += 6
-
+        them, us1 = base_score[them], base_score[us]
+        res1 += us1 + draw_win_lose_score[(us1 - them) % 3]
+        us2 = (them + us1 - 1) % 3  # (them + {"X": -1, "Y": 0, "Z": 1}[us]) % 3
+        res2 += us2 + draw_win_lose_score[(us2 - them) % 3]
     return res1, res2
 
 
