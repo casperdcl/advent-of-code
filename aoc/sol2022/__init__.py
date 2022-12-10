@@ -1,3 +1,4 @@
+"""Solutions to https://adventofcode.com/2022"""
 import string
 from collections import defaultdict, deque
 from heapq import nlargest

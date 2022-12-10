@@ -1,3 +1,4 @@
+"""Solutions to https://adventofcode.com/2021"""
 import operator
 import re
 from collections import Counter

@@ -1,3 +1,4 @@
+"""Solutions to https://adventofcode.com/2020"""
 import re
 from collections import Counter, defaultdict, deque
 from collections.abc import Iterable
