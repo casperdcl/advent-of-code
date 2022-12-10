@@ -1,8 +1,8 @@
 import string
-from collections import deque
-from functools import cache
+from collections import defaultdict, deque
 from heapq import nlargest
 from itertools import pairwise
+from pathlib import Path
 
 import numpy as np
 
@@ -103,56 +103,30 @@ def day6():
     return res1, res2
 
 
-class MultiNode:
-    def __init__(self, name, value=0, parent=None):
-        self.name = name
-        self.value = value
-        self.children = set()
-        self.parent = parent
-        if parent is not None:
-            parent.children.add(self)
-
-    @cache  # assumes no further modifications to `self.children`
-    def __len__(self):
-        return sum(map(len, self.children)) + self.value
-
-    def __getitem__(self, name):
-        return next(filter(lambda i: i.name == name, self.children))
-
-    def __iter__(self):
-        yield self
-        for i in self.children:
-            if i.children:  # exclude leaves
-                yield from i
-
-    def add(self, *args, **kwargs):
-        return MultiNode(*args, parent=self, **kwargs)
-
-
 def day7():
     """Directory sizes."""
     tty = open("7.txt").read().strip().split("\n")
-    root = cwd = MultiNode("/")
+    sizes = defaultdict(int)  # {path: size}
+    cwd = Path("/")
     for l in tty:
         match l.split():
-            case "$", "ls":
+            case ("$", "ls") | ("dir", _):
                 pass
             case "$", "cd", "..":
                 cwd = cwd.parent
             case "$", "cd", "/":
-                cwd = root
+                cwd = Path("/")
             case "$", "cd", subdir:
-                cwd = cwd[subdir]  # except: cwd = cwd.add(subdir)
-            case "dir", subdir:
-                cwd.add(subdir)
-            case size, filename:
-                cwd.add(filename, value=int(size))
+                cwd /= subdir
+            case size, _:  # increase size of all directories in the tree
+                for path in (cwd / "_").parents:
+                    sizes[path] += int(size)
             case _:
                 raise ValueError(l)
 
-    res1 = sum(len(cwd) for cwd in root if len(cwd) <= 100_000)
-    diff = 30_000_000 - (70_000_000 - len(root))
-    res2 = min(len(cwd) for cwd in root if len(cwd) >= diff)
+    res1 = sum(filter(lambda s: s <= 100_000, sizes.values()))
+    diff = 30_000_000 - (70_000_000 - sizes[Path("/")])
+    res2 = min(filter(lambda s: s >= diff, sizes.values()))
     return res1, res2
 
 
