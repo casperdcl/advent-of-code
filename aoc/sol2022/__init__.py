@@ -6,6 +6,8 @@ from pathlib import Path
 
 import numpy as np
 
+from aoc.sol2021 import plot_binary
+
 
 def day1():
     """Reducing & sorting lists."""
@@ -159,3 +161,28 @@ def day9():
                     break
     res1, res2 = map(len, visited.values())
     return res1, res2
+
+
+def day10():
+    """CRT drawing in assembly."""
+    x, cycle, res1 = 1, 0, 0
+    res2 = np.empty((6, 40), dtype=bool)
+
+    def step(x, cycle, strength):
+        Y, X = divmod(cycle, 40)  # CRT position
+        res2[Y, X] = -2 < X - x < 2  # overlaps sprite position
+        cycle += 1
+        return cycle, strength + (cycle * x if cycle % 40 == 20 else 0)
+
+    for pc in open("10.txt").read().strip().split("\n"):
+        match pc.split():
+            case "addx", v:
+                for _ in range(2):
+                    cycle, res1 = step(x, cycle, res1)
+                x += int(v)
+            case ("noop",):
+                cycle, res1 = step(x, cycle, res1)
+            case _:
+                raise ValueError(pc)
+
+    return res1, plot_binary(res2)
