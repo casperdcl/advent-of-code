@@ -3,6 +3,7 @@ import re
 from collections import Counter
 from dataclasses import dataclass
 from functools import lru_cache, reduce
+from hashlib import blake2b
 from io import StringIO
 from itertools import count, cycle, permutations, product
 
@@ -380,6 +381,12 @@ def day12():
     return recurse(), recurse(allow_twice=True)
 
 
+def plot_binary(grid) -> str:
+    """Prints binary (black/white) image & returns checksum"""
+    print(im := "\n".join("".join("\u2588" if x else " " for x in y) for y in grid))
+    return f"^plot_binary:{blake2b(im.encode()).hexdigest()[:7]}^"
+
+
 def day13():
     """Folding paper."""
     xy, folds = open("13.txt").read().strip().split("\n\n", 1)
@@ -401,9 +408,7 @@ def day13():
         if res1 is None:
             res1 = grid.sum()
 
-    print("\n".join("".join("\u2588" if x else " " for x in y) for y in grid))
-
-    return res1, f"^plot ({grid.sum()})^"
+    return res1, plot_binary(grid)
 
 
 def day14():
