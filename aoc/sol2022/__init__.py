@@ -1,11 +1,15 @@
 """Solutions to https://adventofcode.com/2022"""
+import re
 import string
 from collections import defaultdict, deque
+from copy import deepcopy
+from dataclasses import dataclass
 from heapq import nlargest
 from itertools import pairwise
 from pathlib import Path
 
 import numpy as np
+from tqdm import trange
 
 from aoc.sol2021 import plot_binary
 
@@ -187,3 +191,43 @@ def day10():
                 raise ValueError(pc)
 
     return res1, plot_binary(res2)
+
+
+def day11():
+    """Passing parcels."""
+
+    @dataclass
+    class Monkey:
+        items: deque[int]
+        op: str
+        div: int
+        y: int
+        n: int
+        seen: int = 0
+
+    mnks = [
+        Monkey(deque(map(int, items.split(", "))), op, *map(int, (div, y, n)))
+        for items, op, div, y, n in re.findall(
+            r"""Monkey \d+:
+  Starting items: ([0-9, ]*)
+  Operation: new = (.*)
+  Test: divisible by (\d+)
+    If true: throw to monkey (\d+)
+    If false: throw to monkey (\d+)""",
+            open("11.txt").read(),
+            flags=re.M,
+        )
+    ]
+    lcm = np.prod(tuple({m.div for m in mnks}))
+
+    def solve(mnks, rounds, divisor):
+        for _ in trange(rounds, leave=False):
+            for m in mnks:
+                m.seen += len(m.items)
+                while m.items:
+                    old = m.items.popleft()  # NOQA: F841
+                    new = (eval(m.op) // divisor) % lcm
+                    mnks[m.n if new % m.div else m.y].items.append(new)
+        return np.prod(nlargest(2, (m.seen for m in mnks)))
+
+    return solve(deepcopy(mnks), 20, 3), solve(mnks, 10_000, 1)
