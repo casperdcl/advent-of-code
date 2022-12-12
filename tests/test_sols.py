@@ -81,6 +81,7 @@ output = {
 █     ███ █  █ █     ███ ████  ██   ███
 10 CRT drawing in assembly. (15260, '^plot_binary:90c8028^') 0.00s
 11 Passing parcels. (55216, 12848882750) 0.08s
+12 Shortest path. (383, 377) 0.28s
 """,
 }
 

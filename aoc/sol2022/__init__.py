@@ -10,8 +10,10 @@ from math import lcm
 from pathlib import Path
 from typing import Callable
 
+import networkx as nx
 import numpy as np
 
+from aoc.sol2020 import conv
 from aoc.sol2021 import plot_binary
 
 
@@ -236,3 +238,32 @@ def day11():
         return np.prod(nlargest(2, (m.seen for m in mnks)))
 
     return solve(deepcopy(mnks), 20, 3), solve(mnks, 10_000, 1)
+
+
+def day12():
+    """Shortest path."""
+    grid = np.array(
+        [list(map(ord, y)) for y in open("12.txt").read().strip().split()],
+        dtype=np.int8,
+    ) - ord("a")
+    [yS], [xS] = np.where(grid == ord("S") - ord("a"))  # start
+    [yE], [xE] = np.where(grid == ord("E") - ord("a"))  # end
+    grid[[yS, yE], [xS, xE]] = vmin, vmax = 0, 25
+
+    g = nx.DiGraph()
+    for dy, dx in ((-1, 0), (1, 0), (0, -1), (0, 1)):  # north south west east
+        knl = np.zeros((3, 3), dtype=np.int8)
+        knl[1, 1], knl[1 + dy, 1 + dx] = -1, 1
+        for y, x in zip(
+            *np.where(conv(grid, knl[::-1, ::-1], mode="constant", cval=vmax + 2) < 2)
+        ):
+            g.add_edge((y, x), (y + dy, x + dx))
+    res1 = nx.shortest_path_length(g, (yS, xS), (yE, xE))
+
+    res2 = grid.size
+    for yS, xS in zip(*np.where(grid == vmin)):
+        try:
+            res2 = min(res2, nx.shortest_path_length(g, (yS, xS), (yE, xE)))
+        except nx.NetworkXNoPath:
+            pass
+    return res1, res2
